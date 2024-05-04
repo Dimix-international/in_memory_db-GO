@@ -15,7 +15,7 @@ var (
 )
 
 type Config struct {
-	Env string `env:"ENV"`
+	Env string `env:"ENV" envDefault:"local"`
 }
 
 func MustLoadConfig() Config {
