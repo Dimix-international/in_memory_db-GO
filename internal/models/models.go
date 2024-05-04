@@ -23,3 +23,8 @@ var (
 	ErrInvalidArguments = errors.New("invalid arguments")
 	ErrInvalidCommand   = errors.New("invalid command")
 )
+
+type Query struct {
+	Command   string
+	Arguments []string
+}
