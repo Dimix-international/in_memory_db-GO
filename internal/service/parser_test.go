@@ -8,14 +8,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type TestItems struct {
+type testParserItem struct {
 	query  string
 	tokens []string
 	err    error
 }
 
 func Test_Parse(t *testing.T) {
-	testCases := [...]TestItems{
+	testCases := [...]testParserItem{
 		{query: "SET weather_2_pm cold_moscow_weather", tokens: []string{"SET", "weather_2_pm", "cold_moscow_weather"}, err: nil},
 		{query: "SET\tweather_2_pm\tcold_moscow_weather", tokens: []string{"SET", "weather_2_pm", "cold_moscow_weather"}, err: nil},
 		{query: "GET /etc/nginx/config.yaml", tokens: nil, err: models.ErrParsing},
