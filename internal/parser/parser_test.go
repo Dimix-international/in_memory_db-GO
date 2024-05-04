@@ -23,7 +23,7 @@ func Test_Parse(t *testing.T) {
 		{query: "GET   ", tokens: []string{"GET"}, err: nil},
 		{query: "   GET ++", tokens: nil, err: models.ErrParsing},
 		{query: "DEL user_****", tokens: []string{"DEL", "user_****"}, err: nil},
-		{query: "DEL\nuser_****\n", tokens: []string{"DEL", "user_****"}, err: nil},
+		{query: "DEL\nuser_****\nmany_words\n", tokens: []string{"DEL", "user_****", "many_words"}, err: nil},
 		{query: "SET user_**** cre++ate", tokens: nil, err: models.ErrParsing},
 	}
 
