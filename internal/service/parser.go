@@ -1,4 +1,4 @@
-package parser
+package service
 
 import (
 	"strings"
@@ -12,17 +12,17 @@ const (
 	whiteSpaceState
 )
 
-type Parser struct {
+type ParserService struct {
 	state  int
 	tokens []string
 	sb     strings.Builder
 }
 
-func NewParser() *Parser {
-	return &Parser{state: startState}
+func NewParserService() *ParserService {
+	return &ParserService{state: startState}
 }
 
-func (p *Parser) Parse(query string) ([]string, error) {
+func (p *ParserService) Parse(query string) ([]string, error) {
 	for i := range query {
 		switch p.state {
 		case startState:

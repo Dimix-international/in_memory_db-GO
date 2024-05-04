@@ -1,4 +1,4 @@
-package parser
+package service
 
 import (
 	"testing"
@@ -32,7 +32,7 @@ func Test_Parse(t *testing.T) {
 		t.Run("check correcting of parsing", func(t *testing.T) {
 			t.Parallel()
 
-			parser := NewParser()
+			parser := NewParserService()
 			tokens, err := parser.Parse(test.query)
 
 			assert.Equal(t, tokens, test.tokens)
