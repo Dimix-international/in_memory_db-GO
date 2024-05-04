@@ -1,0 +1,180 @@
+run:
+  concurrency: 4
+  deadline: 5m
+  issues-exit-code: 1
+  tests: true
+  build-tags:
+    - integration
+  skip-dirs:
+    - vendor
+  modules-download-mode: vendor
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters-settings:
+  depguard:
+    list-type: blacklist
+    include-go-root: false
+  dogsled:
+    max-blank-identifiers: 3
+  errcheck:
+    check-type-assertions: true
+    check-blank: false
+    ignore: fmt:.*,io/ioutil:^Read.*
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  gocritic:
+    enabled-tags:
+      - performance
+      - diagnostic
+    settings:
+      captLocal:
+        paramsOnly: true
+      hugeParam:
+        sizeThreshold: 600
+      rangeValCopy:
+        sizeThreshold: 600
+  gocyclo:
+    min-complexity: 15
+  gofmt:
+    simplify: true
+  revive:
+    min-confidence: 0.8
+  govet:
+    check-shadowing: true
+  lll:
+    line-length: 250
+    tab-width: 4
+  misspell:
+    locale: US
+  nakedret:
+    max-func-lines: 40
+  prealloc:
+    simple: true
+    range-loops: true
+    for-loops: false
+  unparam:
+    check-exported: false
+  unused:
+    check-exported: false
+
+linters:
+  fast: false
+  enable:
+    - asciicheck
+    - bodyclose
+    - dogsled
+    - exhaustive
+    - exportloopref
+    - goconst
+    - gocritic
+    - gocyclo
+    - godox
+    - gofmt
+    - goheader
+    - goprintffuncname
+    - gosimple
+    - govet
+    - ineffassign
+    - lll
+    - nakedret
+    - nestif
+    - nolintlint
+    - prealloc
+    - rowserrcheck
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+  disable:
+    - dupl
+    - errcheck
+    - funlen
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - godot
+    - goerr113
+    - gofumpt
+    - gosec
+    - maligned
+    - noctx
+    - gomnd
+    - misspell
+    - scopelint
+    - sqlclosecheck
+    - testpackage
+    - wsl
+    - gomodguard
+    - depguard
+    - goimports
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - gocritic
+        - errcheck
+        - dupl
+        - gosec
+        - maligned
+        - gochecknoglobals
+        - lll
+        - noctx
+        - goerr113
+        - goconst
+
+    - path: _mock\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+        - maligned
+        - gochecknoglobals
+        - typecheck
+
+    - linters:
+        - govet
+      text: "declaration of \"err\" shadows declaration"
+
+    - linters:
+        - lll
+      text: "^//( )?go:generate "
+
+    - linters:
+        - govet
+      source: "log := log"
+
+    - linters:
+        - gochecknoglobals
+      text: "`log` is a global variable$"
+
+    - linters:
+        - staticcheck
+      source: "choice:\".+\""
+
+    - linters:
+        - stylecheck
+      text: "ST1000:" #disable at least one file in a package should have a package comment
+
+    - linters:
+        - stylecheck
+      text: "ST1020:" #disable comment on exported method
+
+    - linters:
+        - revive
+      text: "exported \\w+ (\\S*['.]*)([a-zA-Z'.*]*) should have "
+
+  exclude-use-default: false
+  max-per-linter: 0
+  max-same-issues: 0
+  new: false
