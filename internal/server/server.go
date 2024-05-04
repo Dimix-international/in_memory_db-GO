@@ -63,11 +63,12 @@ func (s *Server) launchServer() error {
 			s.log.Error("error read string", "err", err)
 			continue
 		}
-		request = strings.TrimSpace(request)
 
+		request = strings.TrimSpace(request)
 		if len(request) == 0 {
 			continue
 		}
+
 		s.handlerMessages(request)
 	}
 }
@@ -89,7 +90,7 @@ func (s *Server) handlerMessages(message string) {
 	case models.GetCommand:
 		value, ok := s.db.Get(query.Arguments[0])
 		if !ok {
-			s.log.Error("key in db is not exist", "key", query.Arguments[0])
+			s.log.Info("key in db is not exist", "key", query.Arguments[0])
 			break
 		}
 		s.log.Info("got value from db", "value", value)
