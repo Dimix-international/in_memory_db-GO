@@ -1,12 +1,14 @@
 package models
 
-import "errors"
+import (
+	"context"
+	"errors"
+)
 
 const (
-	GetCommand     = "GET"
-	SetCommand     = "SET"
-	DeleteCommand  = "DELETE"
-	UnknownCommand = "UNKNOWN"
+	GetCommand    = "GET"
+	SetCommand    = "SET"
+	DeleteCommand = "DELETE"
 
 	GetCommandArgumentsNumber    = 1
 	DeleteCommandArgumentsNumber = 1
@@ -28,3 +30,5 @@ type Query struct {
 	Command   string
 	Arguments []string
 }
+
+type CloseFunc func(context.Context) error

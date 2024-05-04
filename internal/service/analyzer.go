@@ -25,12 +25,12 @@ func (a *AnalyzerService) Analyze(tokens []string) (models.Query, error) {
 	countArguments, ok := models.CommandRatioWithArument[tokens[0]]
 
 	if !ok {
-		a.log.Error("command is not exist")
+		a.log.Error("command is not exist", "command", tokens[0])
 		return models.Query{}, models.ErrInvalidCommand
 	}
 
 	if len(tokens[1:]) != countArguments {
-		a.log.Error("count of arguments is not correct")
+		a.log.Error("count of arguments is not correct", "args: ", tokens[1:])
 		return models.Query{}, models.ErrInvalidArguments
 	}
 

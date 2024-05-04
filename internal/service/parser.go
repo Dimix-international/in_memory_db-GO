@@ -13,9 +13,8 @@ const (
 )
 
 type ParserService struct {
-	state  int
-	tokens []string
-	sb     strings.Builder
+	state int
+	sb    strings.Builder
 }
 
 func NewParserService() *ParserService {
@@ -23,6 +22,11 @@ func NewParserService() *ParserService {
 }
 
 func (p *ParserService) Parse(query string) ([]string, error) {
+	tokens := make([]string, 0, len(query))
+
+	p.state = startState
+	p.sb.Reset()
+
 	for i := range query {
 		switch p.state {
 		case startState:
@@ -33,7 +37,7 @@ func (p *ParserService) Parse(query string) ([]string, error) {
 			p.state = letterOrPunctuationState
 		case letterOrPunctuationState:
 			if isSpaceSymbol(query[i]) {
-				p.tokens = append(p.tokens, p.sb.String())
+				tokens = append(tokens, p.sb.String())
 				p.sb.Reset()
 				p.state = whiteSpaceState
 				break
@@ -56,10 +60,10 @@ func (p *ParserService) Parse(query string) ([]string, error) {
 	}
 
 	if p.state == letterOrPunctuationState {
-		p.tokens = append(p.tokens, p.sb.String())
+		tokens = append(tokens, p.sb.String())
 	}
 
-	return p.tokens, nil
+	return tokens, nil
 }
 
 func isSpaceSymbol(symbol byte) bool {
