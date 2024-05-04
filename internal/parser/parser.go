@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"log/slog"
 	"strings"
 
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
@@ -14,17 +13,13 @@ const (
 )
 
 type Parser struct {
-	log    *slog.Logger
 	state  int
 	tokens []string
 	sb     strings.Builder
 }
 
-func NewParser(log *slog.Logger) *Parser {
-	return &Parser{
-		log:   log,
-		state: startState,
-	}
+func NewParser() *Parser {
+	return &Parser{state: startState}
 }
 
 func (p *Parser) Parse(query string) ([]string, error) {
@@ -36,7 +31,6 @@ func (p *Parser) Parse(query string) ([]string, error) {
 			}
 			p.sb.WriteByte(query[i])
 			p.state = letterOrPunctuationState
-
 		case letterOrPunctuationState:
 			if isSpaceSymbol(query[i]) {
 				p.tokens = append(p.tokens, p.sb.String())

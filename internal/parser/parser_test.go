@@ -1,10 +1,10 @@
 package parser
 
 import (
-	"log/slog"
 	"testing"
 
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,7 +32,7 @@ func Test_Parse(t *testing.T) {
 		t.Run("check correcting of parsing", func(t *testing.T) {
 			t.Parallel()
 
-			parser := NewParser(slog.Default())
+			parser := NewParser()
 			tokens, err := parser.Parse(test.query)
 
 			assert.Equal(t, tokens, test.tokens)
