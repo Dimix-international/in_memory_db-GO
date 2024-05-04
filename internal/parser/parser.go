@@ -1,9 +1,10 @@
 package parser
 
 import (
-	"errors"
 	"log/slog"
 	"strings"
+
+	"github.com/Dimix-international/in_memory_db-GO/internal/models"
 )
 
 const (
@@ -31,9 +32,9 @@ func (p *Parser) Parse(query string) ([]string, error) {
 		switch p.state {
 		case startState:
 			if !isLetterOrPunctuationSymbol(query[i]) {
-				return nil, errors.New("invalid argument")
+				return nil, models.ErrParsing
 			}
-			p.sb.WriteByte(byte(query[i]))
+			p.sb.WriteByte(query[i])
 			p.state = letterOrPunctuationState
 
 		case letterOrPunctuationState:
@@ -44,15 +45,15 @@ func (p *Parser) Parse(query string) ([]string, error) {
 				break
 			}
 			if !isLetterOrPunctuationSymbol(query[i]) {
-				return nil, errors.New("invalid argument")
+				return nil, models.ErrParsing
 			}
-			p.sb.WriteByte(byte(query[i]))
+			p.sb.WriteByte(query[i])
 		case whiteSpaceState:
 			if isSpaceSymbol(query[i]) {
 				continue
 			}
 			if !isLetterOrPunctuationSymbol(query[i]) {
-				return nil, errors.New("invalid argument")
+				return nil, models.ErrParsing
 			}
 
 			p.sb.WriteByte(query[i])

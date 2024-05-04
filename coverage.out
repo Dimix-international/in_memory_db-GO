@@ -1,0 +1,22 @@
+mode: set
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:23.42,28.2 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:30.56,31.23 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:31.23,32.18 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:33.19,34.46 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:34.46,36.5 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:37.4,38.38 2 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:40.33,41.31 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:41.31,45.10 4 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:47.4,47.46 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:47.46,49.5 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:50.4,50.28 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:51.24,52.31 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:52.31,53.13 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:55.4,55.46 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:55.46,57.5 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:59.4,60.38 2 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:64.2,64.41 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:64.41,66.3 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:68.2,68.22 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:71.38,73.2 1 1
+github.com/Dimix-international/in_memory_db-GO/internal/parser/parser.go:75.52,82.2 1 1
