@@ -96,10 +96,10 @@ func (s *Server) handlerMessages(message string) {
 		s.log.Info("got value from db", "value", value)
 	case models.SetCommand:
 		s.db.Set(query.Arguments[0], query.Arguments[1])
-		s.log.Info("command is execute", "command", query.Command)
+		s.log.Info("command SET is execute", "key", query.Arguments[0])
 	case models.DeleteCommand:
 		s.db.Delete(query.Arguments[0])
-		s.log.Info("command is execute", "command", query.Command)
+		s.log.Info("command DELETE is execute", "key", query.Arguments[0])
 	}
 }
 

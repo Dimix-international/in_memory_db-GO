@@ -11,12 +11,11 @@ type AnalyzerService struct {
 }
 
 func NewAnalyzerService(log *slog.Logger) *AnalyzerService {
+	log = log.With(slog.String("op", "service.Analyze"))
 	return &AnalyzerService{log: log}
 }
 
 func (a *AnalyzerService) Analyze(tokens []string) (models.Query, error) {
-	a.log = a.log.With(slog.String("op", "service.Analyze"))
-
 	if len(tokens) == 0 {
 		a.log.Error("arguments is empty")
 		return models.Query{}, models.ErrInvalidArguments
