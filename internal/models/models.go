@@ -6,32 +6,32 @@ import (
 )
 
 const (
-	//GetCommand the command to get data
+	// GetCommand the command to get data
 	GetCommand = "GET"
-	//SetCommand the command to set data
+	// SetCommand the command to set data
 	SetCommand = "SET"
-	//DeleteCommand the command to delete data
+	// DeleteCommand the command to delete data
 	DeleteCommand = "DELETE"
-	//GetCommandArgumentsNumber the number of arguments for the GET command
+	// GetCommandArgumentsNumber the number of arguments for the GET command
 	GetCommandArgumentsNumber = 1
-	//DeleteCommandArgumentsNumber the number of arguments for the DELETE command
+	// DeleteCommandArgumentsNumber the number of arguments for the DELETE command
 	DeleteCommandArgumentsNumber = 1
-	//SetCommandArgumentsNumber the number of arguments for the SET command
+	// SetCommandArgumentsNumber the number of arguments for the SET command
 	SetCommandArgumentsNumber = 2
 )
 
 var (
-	//CommandRatioWithArument map for checking existing of command
+	// CommandRatioWithArument map for checking existing of command
 	CommandRatioWithArument = map[string]int{
 		GetCommand:    GetCommandArgumentsNumber,
 		SetCommand:    SetCommandArgumentsNumber,
 		DeleteCommand: DeleteCommandArgumentsNumber,
 	}
-	//ErrParsing error parsing the message
+	// ErrParsing error parsing the message
 	ErrParsing = errors.New("invalid argument for parsing")
-	//ErrInvalidArguments error for invalid arguments in the executing command to the database
+	// ErrInvalidArguments error for invalid arguments in the executing command to the database
 	ErrInvalidArguments = errors.New("invalid arguments")
-	//ErrInvalidCommand invalid command to write to the database
+	// ErrInvalidCommand invalid command to write to the database
 	ErrInvalidCommand = errors.New("invalid command")
 )
 
