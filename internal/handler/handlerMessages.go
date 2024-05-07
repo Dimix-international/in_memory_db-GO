@@ -1,4 +1,4 @@
-package service
+package handler
 
 import (
 	"log/slog"
@@ -20,6 +20,7 @@ type dbStorage interface {
 	Delete(key string)
 }
 
+// HandlerMessages - handler instance for handling messages
 type HandlerMessages struct {
 	log      *slog.Logger
 	parser   parserService
@@ -27,6 +28,7 @@ type HandlerMessages struct {
 	db       dbStorage
 }
 
+// NewHanlderMessages creating handler instance
 func NewHanlderMessages(log *slog.Logger, parser parserService, analyzer analyzerService, db dbStorage) *HandlerMessages {
 	return &HandlerMessages{
 		log:      log,
@@ -36,6 +38,7 @@ func NewHanlderMessages(log *slog.Logger, parser parserService, analyzer analyze
 	}
 }
 
+// ProcessMessage start work with message
 func (s *HandlerMessages) ProcessMessage(message string) {
 	tokens, err := s.parser.Parse(message)
 	if err != nil {

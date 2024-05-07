@@ -10,19 +10,19 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Dimix-international/in_memory_db-GO/internal/handler"
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
-	"github.com/Dimix-international/in_memory_db-GO/internal/service"
 )
 
 // Server - server instance for handling requests
 type Server struct {
 	log            *slog.Logger
-	handlerMessage *service.HandlerMessages
+	handlerMessage *handler.HandlerMessages
 	closers        []models.CloseFunc
 }
 
 // NewServer creates an instance of server
-func NewServer(log *slog.Logger, handlerMessage *service.HandlerMessages) *Server {
+func NewServer(log *slog.Logger, handlerMessage *handler.HandlerMessages) *Server {
 	return &Server{
 		log:            log,
 		handlerMessage: handlerMessage,

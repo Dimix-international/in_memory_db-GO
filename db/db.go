@@ -58,7 +58,7 @@ func (d *DB) getShard(key string) *Shard {
 
 	shardIndex := hash % len(d.shardMap)
 	if shardIndex >= len(d.shardMap) {
-		shardIndex = shardIndex % len(d.shardMap)
+		shardIndex %= len(d.shardMap)
 	}
 
 	return d.shardMap[shardIndex]

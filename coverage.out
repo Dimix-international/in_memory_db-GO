@@ -16,17 +16,6 @@ github.com/Dimix-international/in_memory_db-GO/internal/service/analyzer.go:29.9
 github.com/Dimix-international/in_memory_db-GO/internal/service/analyzer.go:34.2,34.39 1 1
 github.com/Dimix-international/in_memory_db-GO/internal/service/analyzer.go:34.39,37.3 2 1
 github.com/Dimix-international/in_memory_db-GO/internal/service/analyzer.go:39.2,39.69 1 1
-github.com/Dimix-international/in_memory_db-GO/internal/service/handlerMessages.go:30.122,37.2 1 0
-github.com/Dimix-international/in_memory_db-GO/internal/service/handlerMessages.go:39.58,41.16 2 0
-github.com/Dimix-international/in_memory_db-GO/internal/service/handlerMessages.go:41.16,44.3 2 0
-github.com/Dimix-international/in_memory_db-GO/internal/service/handlerMessages.go:46.2,47.16 2 0
-github.com/Dimix-international/in_memory_db-GO/internal/service/handlerMessages.go:47.16,50.3 2 0
-github.com/Dimix-international/in_memory_db-GO/internal/service/handlerMessages.go:52.2,52.23 1 0
-github.com/Dimix-international/in_memory_db-GO/internal/service/handlerMessages.go:53.25,55.10 2 0
-github.com/Dimix-international/in_memory_db-GO/internal/service/handlerMessages.go:55.10,57.9 2 0
-github.com/Dimix-international/in_memory_db-GO/internal/service/handlerMessages.go:59.3,59.50 1 0
-github.com/Dimix-international/in_memory_db-GO/internal/service/handlerMessages.go:60.25,62.66 2 0
-github.com/Dimix-international/in_memory_db-GO/internal/service/handlerMessages.go:63.28,65.69 2 0
 github.com/Dimix-international/in_memory_db-GO/internal/service/parser.go:22.40,24.2 1 1
 github.com/Dimix-international/in_memory_db-GO/internal/service/parser.go:27.63,33.23 4 1
 github.com/Dimix-international/in_memory_db-GO/internal/service/parser.go:33.23,34.18 1 1
