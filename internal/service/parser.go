@@ -12,15 +12,18 @@ const (
 	whiteSpaceState
 )
 
+// ParserService - message parsing and validation
 type ParserService struct {
 	state int
 	sb    strings.Builder
 }
 
+// NewParserService creating a parser instance
 func NewParserService() *ParserService {
 	return &ParserService{state: startState}
 }
 
+// Parse starting parsing
 func (p *ParserService) Parse(query string) ([]string, error) {
 	tokens := make([]string, 0, len(query))
 

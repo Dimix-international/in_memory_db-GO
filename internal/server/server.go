@@ -13,6 +13,7 @@ import (
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
 )
 
+// Server - server instance for handling requests
 type Server struct {
 	log      *slog.Logger
 	parser   parserService
@@ -21,6 +22,7 @@ type Server struct {
 	closers  []models.CloseFunc
 }
 
+// NewServer creates an instance of server
 func NewServer(log *slog.Logger, parser parserService, analyzer analyzerService, db dbStorage) *Server {
 	return &Server{
 		log:      log,
@@ -30,6 +32,7 @@ func NewServer(log *slog.Logger, parser parserService, analyzer analyzerService,
 	}
 }
 
+// Run launches server
 func (s *Server) Run() {
 	s.log = s.log.With(slog.String("op", "server"))
 	exit := make(chan os.Signal, 1)

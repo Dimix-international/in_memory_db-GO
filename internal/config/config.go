@@ -14,10 +14,12 @@ var (
 	once sync.Once
 )
 
+// Config - a structure containing the project configuration from an env file
 type Config struct {
 	Env string `env:"ENV" envDefault:"local"`
 }
 
+// MustLoadConfig starts reading from the .env file and writing to the configuration structure
 func MustLoadConfig() Config {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("error loading .env file")

@@ -11,6 +11,7 @@ const (
 	envProd  = "prod"
 )
 
+// SetupLogger creating a logging example based on an environment variable
 func SetupLogger(evn string) *slog.Logger {
 	var log *slog.Logger
 
