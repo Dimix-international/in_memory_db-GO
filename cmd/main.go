@@ -11,8 +11,10 @@ import (
 func main() {
 	cfg := config.MustLoadConfig()
 	log := logger.SetupLogger(cfg.Env)
-
-	server.NewServer(log, service.NewParserService(), service.NewAnalyzerService(log), db.NewShardMap()).Run()
+	server.NewServer(
+		log,
+		service.NewHanlderMessages(log, service.NewParserService(), service.NewAnalyzerService(log), db.NewShardMap(10)),
+	).Run()
 
 	log.Info("app finish")
 }

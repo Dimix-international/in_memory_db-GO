@@ -14,10 +14,10 @@ type DB struct {
 	shardMap []*Shard
 }
 
-func NewShardMap() *DB {
-	shards := make([]*Shard, 10)
+func NewShardMap(count int) *DB {
+	shards := make([]*Shard, count)
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < count; i++ {
 		shards[i] = &Shard{data: make(map[string]string)}
 	}
 
@@ -56,5 +56,10 @@ func (d *DB) getShard(key string) *Shard {
 	checksum := sha1.Sum([]byte(key))
 	hash := int(checksum[0])
 
-	return d.shardMap[hash%len(d.shardMap)]
+	shardIndex := hash % len(d.shardMap)
+	if shardIndex >= len(d.shardMap) {
+		shardIndex = shardIndex % len(d.shardMap)
+	}
+
+	return d.shardMap[shardIndex]
 }
