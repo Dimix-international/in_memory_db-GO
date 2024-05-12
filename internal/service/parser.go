@@ -25,7 +25,7 @@ func NewParserService() *ParserService {
 
 // Parse starting parsing
 func (p *ParserService) Parse(query string) ([]string, error) {
-	tokens := make([]string, 0, len(query))
+	tokens := make([]string, 0, len([]rune(query)))
 
 	p.state = startState
 	p.sb.Reset()
