@@ -1,4 +1,4 @@
-package server
+package app
 
 import (
 	"bufio"
@@ -14,29 +14,29 @@ import (
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
 )
 
-// Server - server instance for handling requests
-type Server struct {
+// App - server instance for handling requests
+type App struct {
 	log            *slog.Logger
 	handlerMessage *handler.HandlerMessages
 	closers        []models.CloseFunc
 }
 
-// NewServer creates an instance of server
-func NewServer(log *slog.Logger, handlerMessage *handler.HandlerMessages) *Server {
-	return &Server{
+// NewApp creates an instance of server
+func NewApp(log *slog.Logger, handlerMessage *handler.HandlerMessages) *App {
+	return &App{
 		log:            log,
 		handlerMessage: handlerMessage,
 	}
 }
 
-// Run launches server
-func (s *Server) Run() {
+// Run launches app
+func (s *App) Run() {
 	s.log = s.log.With(slog.String("op", "server"))
 	exit := make(chan os.Signal, 1)
 	signal.Notify(exit, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
-		if err := s.launchServer(); err != nil {
+		if err := s.launchApp(); err != nil {
 			s.log.Error("Stop server", "err", err)
 			exit <- syscall.SIGTERM
 			close(exit)
@@ -53,7 +53,7 @@ func (s *Server) Run() {
 	}
 }
 
-func (s *Server) launchServer() error {
+func (s *App) launchApp() error {
 	reader := bufio.NewReader(os.Stdin)
 	s.log.Info("start server")
 
@@ -73,7 +73,7 @@ func (s *Server) launchServer() error {
 	}
 }
 
-func (s *Server) shutdown(ctx context.Context) error {
+func (s *App) shutdown(ctx context.Context) error {
 	for _, fn := range s.closers {
 		if err := fn(ctx); err != nil {
 			return err
