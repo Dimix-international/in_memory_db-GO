@@ -31,7 +31,7 @@ func NewApp(log *slog.Logger, handlerMessage *handler.HandlerMessages) *App {
 
 // Run launches app
 func (s *App) Run() {
-	s.log = s.log.With(slog.String("op", "server"))
+	s.log = s.log.With(slog.String("op", "app"))
 	exit := make(chan os.Signal, 1)
 	signal.Notify(exit, os.Interrupt, syscall.SIGTERM)
 
@@ -49,13 +49,13 @@ func (s *App) Run() {
 	defer shutdownCancel()
 
 	if err := s.shutdown(shutdownCtx); err != nil {
-		s.log.Error("error closing server", "err", err)
+		s.log.Error("error closing app", "err", err)
 	}
 }
 
 func (s *App) launchApp() error {
 	reader := bufio.NewReader(os.Stdin)
-	s.log.Info("start server")
+	s.log.Info("start app")
 
 	for {
 		request, err := reader.ReadString('\n')
