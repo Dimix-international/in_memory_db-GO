@@ -20,7 +20,7 @@ func main() {
 	log := logger.SetupLogger(cfg.Env)
 	app := app.NewApp(
 		log,
-		handler.NewHanlderMessages(log, service.NewParserService(), service.NewAnalyzerService(log), db.NewShardMap(10)),
+		handler.NewHanlderMessages(log, service.NewParserService(), service.NewAnalyzerService(), db.NewShardMap(10)),
 	)
 
 	exit := make(chan os.Signal, 1)

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"log/slog"
+	"fmt"
 	"testing"
 
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
@@ -35,27 +35,36 @@ func TestAnalyze(t *testing.T) {
 		{
 			tokens: []string{},
 			qwery:  models.Query{},
-			err:    models.ErrInvalidArguments,
+			err:    fmt.Errorf("arguments is empty: %w", models.ErrInvalidArguments),
 		},
 		{
 			tokens: []string{"TRANSACTION", "weather_2_pm"},
 			qwery:  models.Query{},
-			err:    models.ErrInvalidCommand,
+			err:    fmt.Errorf("command TRANSACTION is not exist: %w", models.ErrInvalidArguments),
 		},
 		{
 			tokens: []string{"GET", "weather_2_pm", "cold_moscow_weather"},
 			qwery:  models.Query{},
-			err:    models.ErrInvalidArguments,
+			err: fmt.Errorf(
+				"passed number of arguments equal to 2 is not correct for command GET: %w",
+				models.ErrInvalidArguments,
+			),
 		},
 		{
 			tokens: []string{"SET", "weather_2_pm", "cold_moscow_weather", "cold_moscow_weather cold"},
 			qwery:  models.Query{},
-			err:    models.ErrInvalidArguments,
+			err: fmt.Errorf(
+				"passed number of arguments equal to 3 is not correct for command SET: %w",
+				models.ErrInvalidArguments,
+			),
 		},
 		{
 			tokens: []string{"DELETE"},
 			qwery:  models.Query{},
-			err:    models.ErrInvalidArguments,
+			err: fmt.Errorf(
+				"passed number of arguments equal to 0 is not correct for command DELETE: %w",
+				models.ErrInvalidArguments,
+			),
 		},
 	}
 
@@ -64,7 +73,7 @@ func TestAnalyze(t *testing.T) {
 		t.Run("check analyzing", func(t *testing.T) {
 			t.Parallel()
 
-			analyzer := NewAnalyzerService(slog.Default())
+			analyzer := NewAnalyzerService()
 			qwery, err := analyzer.Analyze(test.tokens)
 
 			assert.Equal(t, qwery, test.qwery)
