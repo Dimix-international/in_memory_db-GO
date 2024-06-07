@@ -33,6 +33,12 @@ var (
 	ErrInvalidArguments = errors.New("invalid arguments")
 	// ErrInvalidCommand invalid command to write to the database
 	ErrInvalidCommand = errors.New("invalid command")
+	// ErrInvalidMaxConnections invalid count connections
+	ErrInvalidMaxConnections = errors.New("invalid number of max connections")
+	// ErrInvalidLogger invalid logger
+	ErrInvalidLogger = errors.New("logger is invalid")
+	// ErrInvalidLogger invalid logger
+	ErrNetClosed = errors.New("net closed")
 )
 
 // Query - the structure that stores the command and its arguments for writing to the database

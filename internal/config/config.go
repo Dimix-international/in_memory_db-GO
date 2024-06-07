@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
@@ -26,8 +27,10 @@ type EngineConfig struct {
 }
 
 type NetworkConfig struct {
-	Address        string `yaml:"address" env-default:"127.0.0.1:3223"`
-	MaxConnections int    `yaml:"max_connections" env-default:"100"`
+	Address        string        `yaml:"address" env-default:"127.0.0.1:3223"`
+	MaxConnections int           `yaml:"max_connections" env-default:"100"`
+	IdleTimeout    time.Duration `yaml:"idle_timeout" env-default:"5m"`
+	MaxMessageSize string        `yaml:"max_message_size" env-default:"4KB"`
 }
 
 type LoggingConfig struct {

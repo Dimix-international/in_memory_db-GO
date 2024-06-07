@@ -2,7 +2,9 @@ engine:
   type: "in_memory"
 network:  
   address: "127.0.0.1:3223"  
-  max_connections: 100  
+  max_connections: 2  
+  idle_timeout: 5m
+  max_message_size: "4KB"
 logging:  
   level: "local"  
   output: "/log/output.log"
