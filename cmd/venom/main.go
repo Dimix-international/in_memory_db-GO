@@ -18,12 +18,14 @@ func main() {
 	log := logger.SetupLogger(cfg.Logging.Level)
 	handlerRequest := handler.NewHanlderMessages(log, service.NewParserService(), service.NewAnalyzerService(), db.NewShardMap(shardValue))
 
-	server, err := network.NewTCPServer(handlerRequest, cfg.Network, log)
+	server, err := network.NewTCPServer(cfg.Network, log)
 	if err != nil {
 		log.Error("error start VENOM", "error", err)
 	}
 
-	if err := server.Run(); err != nil {
+	if err := server.Run(func(data []byte) {
+		handlerRequest.ProcessMessage(string(data))
+	}); err != nil {
 		log.Error("finish VENOM", "error", err)
 	}
 

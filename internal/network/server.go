@@ -1,7 +1,6 @@
 package network
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -11,22 +10,21 @@ import (
 	"time"
 
 	"github.com/Dimix-international/in_memory_db-GO/internal/config"
-	"github.com/Dimix-international/in_memory_db-GO/internal/handler"
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
 	"github.com/Dimix-international/in_memory_db-GO/internal/tools"
 )
 
-type TCPHandler = func(context.Context, []byte) []byte
-
 type TCPServer struct {
 	maxMessageSize int
-	handlerRequest *handler.HandlerMessages
 	cfg            *config.NetworkConfig
 	semaphore      *tools.Semaphore
 	log            *slog.Logger
 }
 
-func NewTCPServer(handlerRequest *handler.HandlerMessages, cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, error) {
+// type TCPHandler = func([]byte) []byte
+type TCPHandler = func([]byte)
+
+func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, error) {
 	if log == nil {
 		return nil, models.ErrInvalidLogger
 	}
@@ -41,13 +39,12 @@ func NewTCPServer(handlerRequest *handler.HandlerMessages, cfg *config.NetworkCo
 
 	return &TCPServer{
 		maxMessageSize: maxMessageSize,
-		handlerRequest: handlerRequest,
 		cfg:            cfg, semaphore: tools.NewSemaphore(cfg.MaxConnections),
 		log: log,
 	}, nil
 }
 
-func (s *TCPServer) Run() error {
+func (s *TCPServer) Run(handler TCPHandler) error {
 	listener, err := net.Listen("tcp", s.cfg.Address)
 	if err != nil {
 		return fmt.Errorf("failed to listen: %w", err)
@@ -74,7 +71,7 @@ func (s *TCPServer) Run() error {
 				defer s.semaphore.Release()
 				s.semaphore.Acquire()
 
-				s.handleConn(conn)
+				s.handleConn(conn, handler)
 			}(conn)
 		}
 	}()
@@ -88,7 +85,7 @@ func (s *TCPServer) Run() error {
 	return nil
 }
 
-func (s *TCPServer) handleConn(conn net.Conn) {
+func (s *TCPServer) handleConn(conn net.Conn, handler TCPHandler) {
 	request := make([]byte, s.maxMessageSize)
 
 	for {
@@ -107,7 +104,7 @@ func (s *TCPServer) handleConn(conn net.Conn) {
 		}
 
 		fmt.Println(request)
-		s.handlerRequest.ProcessMessage(string(request[:count]))
+		handler(request[:count])
 	}
 
 	if err := conn.Close(); err != nil {
