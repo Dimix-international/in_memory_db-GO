@@ -5,20 +5,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Dimix-international/in_memory_db-GO/db"
-	"github.com/Dimix-international/in_memory_db-GO/internal/handler"
 	"github.com/Dimix-international/in_memory_db-GO/internal/logger"
-	"github.com/Dimix-international/in_memory_db-GO/internal/service"
-)
-
-const (
-	ShardValue = 10
 )
 
 func main() {
 	log := logger.SetupLogger("")
 	reader := bufio.NewReader(os.Stdin)
-	handlerMessage := handler.NewHanlderMessages(log, service.NewParserService(), service.NewAnalyzerService(), db.NewShardMap(ShardValue))
+	//handlerMessage := handler.NewHanlderMessages(log, service.NewParserService(), service.NewAnalyzerService(), db.NewShardMap(ShardValue))
 
 	log.Info("start CLI")
 
@@ -34,6 +27,6 @@ func main() {
 			continue
 		}
 
-		handlerMessage.ProcessMessage(request)
+		//handlerMessage.ProcessMessage(request)
 	}
 }

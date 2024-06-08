@@ -40,8 +40,8 @@ func NewHanlderMessages(log *slog.Logger, parser parserService, analyzer analyze
 }
 
 // ProcessMessage start work with message
-func (s *HandlerMessages) ProcessMessage(message string) string {
-	tokens, err := s.parser.Parse(message)
+func (s *HandlerMessages) ProcessMessage(command []byte) string {
+	tokens, err := s.parser.Parse(string(command))
 	if err != nil {
 		s.log.Error("parsing error", "err", err)
 		return fmt.Sprintf("parsing error: %v", err)

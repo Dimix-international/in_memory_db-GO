@@ -26,7 +26,6 @@ type TCPServer struct {
 	cfg            *config.NetworkConfig
 	semaphore      *tools.Semaphore
 	log            *slog.Logger
-	listener       net.Listener
 }
 
 func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, error) {
@@ -54,8 +53,6 @@ func (s *TCPServer) Run() error {
 	if err != nil {
 		return fmt.Errorf("failed to listen: %w", err)
 	}
-
-	s.listener = listener
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -111,7 +108,7 @@ func (s *TCPServer) handleConn(conn net.Conn) {
 			break
 		}
 
-		result := handlerRequest.ProcessMessage(string(request[:count]))
+		result := handlerRequest.ProcessMessage(request[:count])
 
 		if _, err := conn.Write([]byte(result)); err != nil {
 			if err != io.EOF {

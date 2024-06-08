@@ -19,7 +19,8 @@ func TestSercer(t *testing.T) {
 			Address:        ":20001",
 			MaxConnections: 1,
 			IdleTimeout:    time.Second * 5,
-			MaxMessageSize: "2KB"},
+			MaxMessageSize: "2KB",
+		},
 		logger.SetupLogger(""),
 	)
 	assert.NoError(t, err)
@@ -45,11 +46,11 @@ func TestSercer(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, []byte(response), buffer[:count])
 
-	//The 2nd connect will hang until the first idleTimeout runs out - check semaphore
+	//The 2nd connect will wait until the first idleTimeout runs out - check semaphore
 	connection2, err := net.Dial("tcp", "localhost:20001")
 
-	request2 := "SET weather_2_pm_2222 cold_moscow_weather"
-	response2 := "command SET is execute: weather_2_pm_2222"
+	request2 := "SET command_2 cold_moscow_weather"
+	response2 := "command SET is execute: command_2"
 
 	_, err = connection2.Write([]byte(request2))
 	assert.NoError(t, err)
