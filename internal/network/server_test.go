@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSercer(t *testing.T) {
+func TestServer(t *testing.T) {
 	t.Parallel()
 
 	server, err := NewTCPServer(
@@ -34,6 +34,7 @@ func TestSercer(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	request := "SET weather_2_pm cold_moscow_weather"
+	requestTwo := "SET command_2 2222"
 	response := "command SET is execute: weather_2_pm"
 
 	connection, err := net.Dial("tcp", "localhost:20001")
@@ -49,7 +50,7 @@ func TestSercer(t *testing.T) {
 
 	time.Sleep(3 * time.Second)
 
-	_, err = connection.Write([]byte(request))
+	_, err = connection.Write([]byte(requestTwo))
 	assert.NoError(t, err)
 
 	//The 2nd connect will wait  until the first idleTimeout runs out - check semaphore
@@ -58,6 +59,9 @@ func TestSercer(t *testing.T) {
 	request2 := "GET weather_2_pm"
 	response2 := "got value from db: cold_moscow_weather"
 
+	request3 := "GET command_2"
+	response3 := "got value from db: 2222"
+
 	_, err = connection2.Write([]byte(request2))
 	assert.NoError(t, err)
 
@@ -65,4 +69,10 @@ func TestSercer(t *testing.T) {
 
 	count, err = connection2.Read(buffer)
 	assert.Equal(t, []byte(response2), buffer[:count])
+
+	_, err = connection2.Write([]byte(request3))
+	assert.NoError(t, err)
+
+	count, err = connection2.Read(buffer)
+	assert.Equal(t, []byte(response3), buffer[:count])
 }
