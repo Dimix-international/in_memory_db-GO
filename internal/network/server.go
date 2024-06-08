@@ -9,9 +9,16 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Dimix-international/in_memory_db-GO/db"
 	"github.com/Dimix-international/in_memory_db-GO/internal/config"
+	"github.com/Dimix-international/in_memory_db-GO/internal/handler"
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
+	"github.com/Dimix-international/in_memory_db-GO/internal/service"
 	"github.com/Dimix-international/in_memory_db-GO/internal/tools"
+)
+
+const (
+	shardValue = 10
 )
 
 type TCPServer struct {
@@ -19,10 +26,8 @@ type TCPServer struct {
 	cfg            *config.NetworkConfig
 	semaphore      *tools.Semaphore
 	log            *slog.Logger
+	listener       net.Listener
 }
-
-// type TCPHandler = func([]byte) []byte
-type TCPHandler = func([]byte)
 
 func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, error) {
 	if log == nil {
@@ -44,11 +49,13 @@ func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, erro
 	}, nil
 }
 
-func (s *TCPServer) Run(handler TCPHandler) error {
+func (s *TCPServer) Run() error {
 	listener, err := net.Listen("tcp", s.cfg.Address)
 	if err != nil {
 		return fmt.Errorf("failed to listen: %w", err)
 	}
+
+	s.listener = listener
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -71,7 +78,7 @@ func (s *TCPServer) Run(handler TCPHandler) error {
 				defer s.semaphore.Release()
 				s.semaphore.Acquire()
 
-				s.handleConn(conn, handler)
+				s.handleConn(conn)
 			}(conn)
 		}
 	}()
@@ -85,8 +92,9 @@ func (s *TCPServer) Run(handler TCPHandler) error {
 	return nil
 }
 
-func (s *TCPServer) handleConn(conn net.Conn, handler TCPHandler) {
+func (s *TCPServer) handleConn(conn net.Conn) {
 	request := make([]byte, s.maxMessageSize)
+	handlerRequest := handler.NewHanlderMessages(s.log, service.NewParserService(), service.NewAnalyzerService(), db.NewShardMap(shardValue))
 
 	for {
 		if err := conn.SetDeadline(time.Now().Add(s.cfg.IdleTimeout)); err != nil {
@@ -103,8 +111,14 @@ func (s *TCPServer) handleConn(conn net.Conn, handler TCPHandler) {
 			break
 		}
 
-		fmt.Println(request)
-		handler(request[:count])
+		result := handlerRequest.ProcessMessage(string(request[:count]))
+
+		if _, err := conn.Write([]byte(result)); err != nil {
+			if err != io.EOF {
+				s.log.Error("failed to write response", "error", err)
+				break
+			}
+		}
 	}
 
 	if err := conn.Close(); err != nil {
