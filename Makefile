@@ -16,7 +16,7 @@ build-cli:
 	@go build -o $(OUTPUT_DIR_CLI)/in_memory_db-GO $(MAIN_FILE_CLI)
 
 run-cli: build-cli
-	@./$(OUTPUT_DIR_CLI)/in_memory_db-GO --config="config/config.yaml"
+	@./$(OUTPUT_DIR_CLI)/in_memory_db-GO --address="localhost:3223"
 
 test:
 	go test ./...

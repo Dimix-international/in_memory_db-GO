@@ -49,17 +49,17 @@ func MustLoadConfig() *Config {
 }
 
 func fetchConfigPath() string {
-	var res string
+	var pathConfig string
 	// --config="path/to/config.yaml"
-	flag.StringVar(&res, "config", "", "path to config file")
+	flag.StringVar(&pathConfig, "config", "", "path to config file")
 	flag.Parse()
 
-	if res == "" {
+	if pathConfig == "" {
 		godotenv.Load()
 		return ConfigFileName
 	}
 
-	return res
+	return pathConfig
 }
 
 func MustLoadPath(configPath string) *Config {
