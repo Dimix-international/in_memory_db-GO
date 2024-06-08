@@ -19,7 +19,7 @@ func TestServer(t *testing.T) {
 		&config.NetworkConfig{
 			Address:        ":20001",
 			MaxConnections: 1,
-			IdleTimeout:    time.Second * 7,
+			IdleTimeout:    time.Second * 5,
 			MaxMessageSize: "2KB",
 		},
 		logger.SetupLogger(""),
@@ -48,7 +48,7 @@ func TestServer(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, []byte(response), buffer[:count])
 
-	time.Sleep(3 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	_, err = connection.Write([]byte(requestTwo))
 	assert.NoError(t, err)
@@ -65,7 +65,7 @@ func TestServer(t *testing.T) {
 	_, err = connection2.Write([]byte(request2))
 	assert.NoError(t, err)
 
-	log.Printf("wait...")
+	log.Printf("wait idleTimeout...")
 
 	count, err = connection2.Read(buffer)
 	assert.Equal(t, []byte(response2), buffer[:count])
@@ -75,4 +75,7 @@ func TestServer(t *testing.T) {
 
 	count, err = connection2.Read(buffer)
 	assert.Equal(t, []byte(response3), buffer[:count])
+
+	err = connection2.Close()
+	assert.NoError(t, err)
 }
