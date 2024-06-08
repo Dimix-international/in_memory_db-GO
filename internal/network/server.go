@@ -26,6 +26,7 @@ type TCPServer struct {
 	cfg            *config.NetworkConfig
 	semaphore      *tools.Semaphore
 	log            *slog.Logger
+	db             *db.DB
 }
 
 func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, error) {
@@ -45,6 +46,7 @@ func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, erro
 		maxMessageSize: maxMessageSize,
 		cfg:            cfg, semaphore: tools.NewSemaphore(cfg.MaxConnections),
 		log: log,
+		db:  db.NewShardMap(shardValue),
 	}, nil
 }
 
@@ -91,7 +93,7 @@ func (s *TCPServer) Run() error {
 
 func (s *TCPServer) handleConn(conn net.Conn) {
 	request := make([]byte, s.maxMessageSize)
-	handlerRequest := handler.NewHanlderMessages(s.log, service.NewParserService(), service.NewAnalyzerService(), db.NewShardMap(shardValue))
+	handlerRequest := handler.NewHanlderMessages(service.NewParserService(), service.NewAnalyzerService(), s.db)
 
 	for {
 		if err := conn.SetDeadline(time.Now().Add(s.cfg.IdleTimeout)); err != nil {
