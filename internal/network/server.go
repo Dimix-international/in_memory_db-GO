@@ -17,10 +17,6 @@ import (
 	"github.com/Dimix-international/in_memory_db-GO/internal/tools"
 )
 
-const (
-	shardValue = 10
-)
-
 type TCPServer struct {
 	maxMessageSize int
 	cfg            *config.NetworkConfig
@@ -46,7 +42,7 @@ func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, erro
 		maxMessageSize: maxMessageSize,
 		cfg:            cfg, semaphore: tools.NewSemaphore(cfg.MaxConnections),
 		log: log,
-		db:  db.NewShardMap(shardValue),
+		db:  db.NewDBMap(),
 	}, nil
 }
 

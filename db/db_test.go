@@ -7,7 +7,7 @@ import (
 )
 
 func TestShardDB(t *testing.T) {
-	db := NewShardMap(10)
+	db := NewDBMap()
 
 	db.Set("a", "1")
 	db.Set("b", "2")
