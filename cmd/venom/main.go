@@ -10,7 +10,7 @@ func main() {
 	cfg := config.MustLoadConfig()
 	log := logger.SetupLogger(cfg.Logging.Level)
 
-	server, err := network.NewTCPServer(cfg.Network, log)
+	server, err := network.NewTCPServer(cfg, log)
 	if err != nil {
 		log.Error("error start VENOM", "error", err)
 	}

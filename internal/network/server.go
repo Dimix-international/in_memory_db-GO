@@ -21,32 +21,44 @@ import (
 
 type TCPServer struct {
 	maxMessageSize int
-	cfg            *config.NetworkConfig
+	cfg            *config.Config
 	semaphore      *tools.Semaphore
 	log            *slog.Logger
 	storage        *storage.Storage
 }
 
-func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, error) {
+func NewTCPServer(cfg *config.Config, log *slog.Logger) (*TCPServer, error) {
 	if log == nil {
 		return nil, models.ErrInvalidLogger
 	}
-	if cfg.MaxConnections <= 0 {
+	if cfg.Network.MaxConnections <= 0 {
 		return nil, models.ErrInvalidMaxConnections
 	}
 
-	maxMessageSize, err := tools.ParseSize(cfg.MaxMessageSize)
+	maxMessageSize, err := tools.ParseSize(cfg.Network.MaxMessageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	maxSegmentize, err := tools.ParseSize(cfg.WAL.MaxSegmentSize)
 	if err != nil {
 		return nil, err
 	}
 
 	return &TCPServer{
 		maxMessageSize: maxMessageSize,
-		cfg:            cfg, semaphore: tools.NewSemaphore(cfg.MaxConnections),
-		log: log,
+		cfg:            cfg,
+		semaphore:      tools.NewSemaphore(cfg.Network.MaxConnections),
+		log:            log,
 		storage: storage.NewStorage(
 			db.NewDBMap(),
-			wal.NewWAL(),
+			wal.NewWAL(
+				wal.NewFSWriter(cfg.WAL.DataDirectory, maxSegmentize, log),
+				wal.NewFSReader(cfg.WAL.DataDirectory, log),
+				cfg.WAL.FlushingBatchTimeout,
+				cfg.WAL.FlushingBatchSize,
+				log,
+			),
 			log,
 		),
 	}, nil
@@ -54,7 +66,7 @@ func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, erro
 
 func (s *TCPServer) Run() error {
 	s.storage.Start()
-	listener, err := net.Listen("tcp", s.cfg.Address)
+	listener, err := net.Listen("tcp", s.cfg.Network.Address)
 	if err != nil {
 		return fmt.Errorf("failed to listen: %w", err)
 	}
@@ -99,7 +111,7 @@ func (s *TCPServer) handleConn(conn net.Conn) {
 	handlerRequest := handler.NewHanlderMessages(service.NewParserService(), service.NewAnalyzerService(), s.storage)
 
 	for {
-		if err := conn.SetDeadline(time.Now().Add(s.cfg.IdleTimeout)); err != nil {
+		if err := conn.SetDeadline(time.Now().Add(s.cfg.Network.IdleTimeout)); err != nil {
 			s.log.Error("failed to set read deadline", "error", err)
 			break
 		}
