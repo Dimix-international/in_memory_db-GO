@@ -11,6 +11,7 @@ import (
 
 	"github.com/Dimix-international/in_memory_db-GO/db"
 	"github.com/Dimix-international/in_memory_db-GO/db/storage"
+	"github.com/Dimix-international/in_memory_db-GO/db/wal"
 	"github.com/Dimix-international/in_memory_db-GO/internal/config"
 	"github.com/Dimix-international/in_memory_db-GO/internal/handler"
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
@@ -42,12 +43,17 @@ func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, erro
 	return &TCPServer{
 		maxMessageSize: maxMessageSize,
 		cfg:            cfg, semaphore: tools.NewSemaphore(cfg.MaxConnections),
-		log:     log,
-		storage: storage.NewStorage(db.NewDBMap(), log),
+		log: log,
+		storage: storage.NewStorage(
+			db.NewDBMap(),
+			wal.NewWAL(),
+			log,
+		),
 	}, nil
 }
 
 func (s *TCPServer) Run() error {
+	s.storage.Start()
 	listener, err := net.Listen("tcp", s.cfg.Address)
 	if err != nil {
 		return fmt.Errorf("failed to listen: %w", err)

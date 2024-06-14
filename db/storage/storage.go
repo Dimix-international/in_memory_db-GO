@@ -8,15 +8,27 @@ type db interface {
 	Delete(key string)
 }
 
+type wal interface {
+	Start()
+}
+
 type Storage struct {
 	db  db
+	wal wal
 	log *slog.Logger
 }
 
-func NewStorage(db db, log *slog.Logger) *Storage {
+func NewStorage(db db, wal wal, log *slog.Logger) *Storage {
 	return &Storage{
 		db:  db,
+		wal: wal,
 		log: log,
+	}
+}
+
+func (s *Storage) Start() {
+	if s.wal != nil {
+		s.wal.Start()
 	}
 }
 
