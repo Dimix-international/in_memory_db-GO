@@ -15,6 +15,8 @@ func main() {
 		log.Error("error start VENOM", "error", err)
 	}
 
+	log.Info("start VENOM")
+
 	if err := server.Run(); err != nil {
 		log.Error("finish VENOM", "error", err)
 	}

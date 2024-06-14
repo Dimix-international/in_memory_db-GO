@@ -14,25 +14,25 @@ type analyzerService interface {
 	Analyze(tokens []string) (models.Query, error)
 }
 
-type dbStorage interface {
-	Get(key string) (string, bool)
-	Set(key string, val string)
-	Delete(key string)
+type storage interface {
+	Get(key string) (string, error)
+	Set(key string, val string) error
+	Del(key string) error
 }
 
 // HandlerMessages - handler instance for handling messages
 type HandlerMessages struct {
 	parser   parserService
 	analyzer analyzerService
-	db       dbStorage
+	store    storage
 }
 
 // NewHanlderMessages creating handler instance
-func NewHanlderMessages(parser parserService, analyzer analyzerService, db dbStorage) *HandlerMessages {
+func NewHanlderMessages(parser parserService, analyzer analyzerService, store storage) *HandlerMessages {
 	return &HandlerMessages{
 		parser:   parser,
 		analyzer: analyzer,
-		db:       db,
+		store:    store,
 	}
 }
 
@@ -50,16 +50,22 @@ func (s *HandlerMessages) ProcessMessage(command []byte) string {
 
 	switch query.Command {
 	case models.GetCommand:
-		value, ok := s.db.Get(query.Arguments[0])
-		if !ok {
+		value, _ := s.store.Get(query.Arguments[0])
+		if len(value) == 0 {
 			return fmt.Sprintf("key in db is not exist: %v", query.Arguments[0])
 		}
 		return fmt.Sprintf("got value from db: %v", value)
 	case models.SetCommand:
-		s.db.Set(query.Arguments[0], query.Arguments[1])
+		err := s.store.Set(query.Arguments[0], query.Arguments[1])
+		if err != nil {
+			return fmt.Sprintf("falied SET command: %v with error %v", query.Arguments[0], err)
+		}
 		return fmt.Sprintf("command SET is execute: %v", query.Arguments[0])
 	case models.DeleteCommand:
-		s.db.Delete(query.Arguments[0])
+		err := s.store.Del(query.Arguments[0])
+		if err != nil {
+			return fmt.Sprintf("falied DELETE command: %v with error %v", query.Arguments[0], err)
+		}
 		return fmt.Sprintf("command DELETE is execute: %v", query.Arguments[0])
 	}
 

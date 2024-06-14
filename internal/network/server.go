@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Dimix-international/in_memory_db-GO/db"
+	"github.com/Dimix-international/in_memory_db-GO/db/storage"
 	"github.com/Dimix-international/in_memory_db-GO/internal/config"
 	"github.com/Dimix-international/in_memory_db-GO/internal/handler"
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
@@ -22,7 +23,7 @@ type TCPServer struct {
 	cfg            *config.NetworkConfig
 	semaphore      *tools.Semaphore
 	log            *slog.Logger
-	db             *db.DB
+	storage        *storage.Storage
 }
 
 func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, error) {
@@ -41,8 +42,8 @@ func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, erro
 	return &TCPServer{
 		maxMessageSize: maxMessageSize,
 		cfg:            cfg, semaphore: tools.NewSemaphore(cfg.MaxConnections),
-		log: log,
-		db:  db.NewDBMap(),
+		log:     log,
+		storage: storage.NewStorage(db.NewDBMap(), log),
 	}, nil
 }
 
@@ -89,7 +90,7 @@ func (s *TCPServer) Run() error {
 
 func (s *TCPServer) handleConn(conn net.Conn) {
 	request := make([]byte, s.maxMessageSize)
-	handlerRequest := handler.NewHanlderMessages(service.NewParserService(), service.NewAnalyzerService(), s.db)
+	handlerRequest := handler.NewHanlderMessages(service.NewParserService(), service.NewAnalyzerService(), s.storage)
 
 	for {
 		if err := conn.SetDeadline(time.Now().Add(s.cfg.IdleTimeout)); err != nil {
