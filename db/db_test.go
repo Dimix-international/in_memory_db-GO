@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShardDB(t *testing.T) {
-	db := NewShardMap(10)
+func TestDBMap(t *testing.T) {
+	db := NewDBMap()
 
 	db.Set("a", "1")
 	db.Set("b", "2")
