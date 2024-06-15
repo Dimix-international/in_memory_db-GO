@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"os"
 	"time"
+
+	"github.com/Dimix-international/in_memory_db-GO/internal/models"
 )
 
 var now = time.Now
@@ -42,7 +44,7 @@ func (w *FSWriter) WriteBatch(batch []Log) {
 		}
 	}
 
-	logs := make([]LogData, 0, len(batch))
+	logs := make([]models.LogData, 0, len(batch))
 
 	for i := 0; i < len(batch); i++ {
 		logs = append(logs, batch[i].data)
@@ -61,7 +63,7 @@ func (w *FSWriter) WriteBatch(batch []Log) {
 	w.acknowledgeWrite(batch, err)
 }
 
-func (w *FSWriter) writeLogs(logs []LogData) error {
+func (w *FSWriter) writeLogs(logs []models.LogData) error {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 

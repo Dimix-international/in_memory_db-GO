@@ -2,8 +2,10 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
+	"github.com/Dimix-international/in_memory_db-GO/internal/models"
 	"github.com/Dimix-international/in_memory_db-GO/internal/tools"
 )
 
@@ -17,6 +19,7 @@ type wal interface {
 	Start()
 	Set(ctx context.Context, key, value string) tools.Future
 	Del(ctx context.Context, key string) tools.Future
+	TryRecoverWALSegments(stream chan<- []models.LogData)
 }
 
 type Storage struct {
@@ -35,6 +38,7 @@ func NewStorage(db db, wal wal, log *slog.Logger) *Storage {
 
 func (s *Storage) Start() {
 	if s.wal != nil {
+		s.recoverDB()
 		s.wal.Start()
 	}
 }
@@ -66,4 +70,17 @@ func (s *Storage) Del(ctx context.Context, key string) error {
 
 	s.db.Delete(key)
 	return nil
+}
+
+func (s *Storage) recoverDB() {
+	logsChan := make(chan []models.LogData)
+
+	go func() {
+		defer close(logsChan)
+		s.wal.TryRecoverWALSegments(logsChan)
+	}()
+
+	for logs := range logsChan {
+		fmt.Println("logs", logs)
+	}
 }

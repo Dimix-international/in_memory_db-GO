@@ -18,10 +18,6 @@ const (
 	DeleteCommandArgumentsNumber = 1
 	// SetCommandArgumentsNumber the number of arguments for the SET command
 	SetCommandArgumentsNumber = 2
-	// SetCommand the id of set command for log
-	SetCommandID = 1
-	// DelCommandID the id of delete command for log
-	DelCommandID = 2
 )
 
 var (
@@ -49,6 +45,13 @@ var (
 type Query struct {
 	Command   string
 	Arguments []string
+}
+
+// LogData - structure of logs for WAL
+type LogData struct {
+	LSN         int64  //id transaction
+	CommandName string //DEL = 1, SET = 2
+	Arguments   []string
 }
 
 type txContextKey string

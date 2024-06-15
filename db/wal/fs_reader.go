@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"os"
 	"sort"
+
+	"github.com/Dimix-international/in_memory_db-GO/internal/models"
 )
 
 type FSReader struct {
@@ -21,13 +23,13 @@ func NewFSReader(directory string, log *slog.Logger) *FSReader {
 	}
 }
 
-func (r *FSReader) ReadLogs() ([]LogData, error) {
+func (r *FSReader) ReadLogs() ([]models.LogData, error) {
 	files, err := os.ReadDir(r.directory)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan WAL directory: %w", err)
 	}
 
-	var logs []LogData
+	var logs []models.LogData
 
 	for i := range files {
 		if files[i].IsDir() {
@@ -51,17 +53,17 @@ func (r *FSReader) ReadLogs() ([]LogData, error) {
 	return logs, nil
 }
 
-func (r *FSReader) readSegment(filename string) ([]LogData, error) {
+func (r *FSReader) readSegment(filename string) ([]models.LogData, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
 
-	var logs []LogData
+	var logs []models.LogData
 	buffer := bytes.NewBuffer(data)
 
 	for buffer.Len() > 0 {
-		var batch []LogData
+		var batch []models.LogData
 
 		decoder := gob.NewDecoder(buffer)
 		if err := decoder.Decode(&batch); err != nil {

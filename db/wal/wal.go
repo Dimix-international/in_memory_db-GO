@@ -15,7 +15,7 @@ type fsWriter interface {
 }
 
 type fsReader interface {
-	ReadLogs() ([]LogData, error)
+	ReadLogs() ([]models.LogData, error)
 }
 
 type WAL struct {
@@ -96,16 +96,16 @@ func (w *WAL) flushBatch() {
 }
 
 func (w *WAL) Set(ctx context.Context, key, value string) tools.Future {
-	return w.push(ctx, models.SetCommandID, []string{key, value})
+	return w.push(ctx, models.SetCommand, []string{key, value})
 }
 
 func (w *WAL) Del(ctx context.Context, key string) tools.Future {
-	return w.push(ctx, models.DelCommandID, []string{key})
+	return w.push(ctx, models.DeleteCommand, []string{key})
 }
 
-func (w *WAL) push(ctx context.Context, commandID int, args []string) tools.Future {
+func (w *WAL) push(ctx context.Context, commandName string, args []string) tools.Future {
 	txID := ctx.Value(models.KeyTxID).(int64)
-	record := NewLog(txID, commandID, args)
+	record := NewLog(txID, commandName, args)
 
 	tools.WithLock(&w.mutex, func() {
 		w.batch = append(w.batch, record)
@@ -119,7 +119,7 @@ func (w *WAL) push(ctx context.Context, commandID int, args []string) tools.Futu
 	return record.Result()
 }
 
-func (w *WAL) TryRecoverWALSegments(stream chan<- []LogData) {
+func (w *WAL) TryRecoverWALSegments(stream chan<- []models.LogData) {
 	logs, err := w.fsReader.ReadLogs()
 	if err != nil {
 		w.log.Error("failed to recover WAL segments", "err", err)

@@ -1,35 +1,32 @@
 package wal
 
-import "github.com/Dimix-international/in_memory_db-GO/internal/tools"
-
-type LogData struct {
-	LSN       int64 //id transaction
-	CommandID int   //DEL = 1, SET = 2
-	Arguments []string
-}
+import (
+	"github.com/Dimix-international/in_memory_db-GO/internal/models"
+	"github.com/Dimix-international/in_memory_db-GO/internal/tools"
+)
 
 type Log struct {
-	data         LogData
+	data         models.LogData
 	writePromise tools.Promise
 }
 
-func NewLog(lsn int64, commandID int, arguments []string) Log {
+func NewLog(lsn int64, commandName string, arguments []string) Log {
 	return Log{
-		data: LogData{
-			LSN:       lsn,
-			CommandID: commandID,
-			Arguments: arguments,
+		data: models.LogData{
+			LSN:         lsn,
+			CommandName: commandName,
+			Arguments:   arguments,
 		},
 		writePromise: *tools.NewPromise(),
 	}
 }
 
-func (l *Log) Data() LogData {
+func (l *Log) Data() models.LogData {
 	return l.data
 }
 
-func (l *Log) CommandID() int {
-	return l.data.CommandID
+func (l *Log) CommandName() string {
+	return l.data.CommandName
 }
 
 func (l *Log) LSN() int64 {
