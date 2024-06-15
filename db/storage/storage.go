@@ -2,8 +2,6 @@ package storage
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"log/slog"
 
 	"github.com/Dimix-international/in_memory_db-GO/internal/tools"
@@ -49,9 +47,8 @@ func (s *Storage) Get(key string) (string, error) {
 func (s *Storage) Set(ctx context.Context, key, value string) error {
 	if s.wal != nil {
 		future := s.wal.Set(ctx, key, value)
-		if result := future.Get(); result != nil {
-			fmt.Println("RESULT", result)
-			return errors.New("set error")
+		if err := future.Get(); err != nil {
+			return err.(error)
 		}
 	}
 
