@@ -69,8 +69,12 @@ func (s *TCPServer) Run() error {
 				continue
 			}
 
+			wg.Add(1)
 			go func(conn net.Conn) {
-				defer s.semaphore.Release()
+				defer func() {
+					s.semaphore.Release()
+					wg.Done()
+				}()
 				s.semaphore.Acquire()
 
 				s.handleConn(conn)
