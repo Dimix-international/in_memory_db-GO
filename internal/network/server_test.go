@@ -1,6 +1,7 @@
 package network
 
 import (
+	"context"
 	"log"
 	"net"
 	"testing"
@@ -37,7 +38,7 @@ func TestServer(t *testing.T) {
 	assert.NoError(t, err)
 
 	go func() {
-		err = server.Run()
+		err = server.Run(context.TODO())
 		assert.NoError(t, err)
 	}()
 

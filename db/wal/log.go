@@ -13,8 +13,8 @@ type Log struct {
 	writePromise tools.Promise
 }
 
-func NewLog(lsn int64, commandID int, arguments []string) *Log {
-	return &Log{
+func NewLog(lsn int64, commandID int, arguments []string) Log {
+	return Log{
 		data: LogData{
 			LSN:       lsn,
 			CommandID: commandID,

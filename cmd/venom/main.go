@@ -1,6 +1,10 @@
 package main
 
 import (
+	"context"
+	"os/signal"
+	"syscall"
+
 	"github.com/Dimix-international/in_memory_db-GO/internal/config"
 	"github.com/Dimix-international/in_memory_db-GO/internal/logger"
 	"github.com/Dimix-international/in_memory_db-GO/internal/network"
@@ -15,9 +19,12 @@ func main() {
 		log.Error("error start VENOM", "error", err)
 	}
 
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
 	log.Info("start VENOM")
 
-	if err := server.Run(); err != nil {
+	if err := server.Run(ctx); err != nil {
 		log.Error("finish VENOM", "error", err)
 	}
 

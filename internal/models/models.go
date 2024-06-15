@@ -18,6 +18,10 @@ const (
 	DeleteCommandArgumentsNumber = 1
 	// SetCommandArgumentsNumber the number of arguments for the SET command
 	SetCommandArgumentsNumber = 2
+	// SetCommand the id of set command for log
+	SetCommandID = 1
+	// DelCommandID the id of delete command for log
+	DelCommandID = 2
 )
 
 var (
@@ -46,6 +50,10 @@ type Query struct {
 	Command   string
 	Arguments []string
 }
+
+type txContextKey string
+
+var KeyTxID = txContextKey("tx")
 
 // CloseFunc - function for graceful shutdown
 type CloseFunc func(context.Context) error

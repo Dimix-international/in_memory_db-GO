@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
@@ -16,8 +17,8 @@ type analyzerService interface {
 
 type storage interface {
 	Get(key string) (string, error)
-	Set(key string, val string) error
-	Del(key string) error
+	Set(ctx context.Context, key, value string) error
+	Del(ctx context.Context, key string) error
 }
 
 // HandlerMessages - handler instance for handling messages
@@ -37,7 +38,7 @@ func NewHanlderMessages(parser parserService, analyzer analyzerService, store st
 }
 
 // ProcessMessage start work with message
-func (s *HandlerMessages) ProcessMessage(command []byte) string {
+func (s *HandlerMessages) ProcessMessage(ctx context.Context, command []byte) string {
 	tokens, err := s.parser.Parse(string(command))
 	if err != nil {
 		return fmt.Sprintf("parsing error: %v", err)
@@ -56,13 +57,13 @@ func (s *HandlerMessages) ProcessMessage(command []byte) string {
 		}
 		return fmt.Sprintf("got value from db: %v", value)
 	case models.SetCommand:
-		err := s.store.Set(query.Arguments[0], query.Arguments[1])
+		err := s.store.Set(ctx, query.Arguments[0], query.Arguments[1])
 		if err != nil {
 			return fmt.Sprintf("falied SET command: %v with error %v", query.Arguments[0], err)
 		}
 		return fmt.Sprintf("command SET is execute: %v", query.Arguments[0])
 	case models.DeleteCommand:
-		err := s.store.Del(query.Arguments[0])
+		err := s.store.Del(ctx, query.Arguments[0])
 		if err != nil {
 			return fmt.Sprintf("falied DELETE command: %v with error %v", query.Arguments[0], err)
 		}

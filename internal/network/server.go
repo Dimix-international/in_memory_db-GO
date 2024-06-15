@@ -1,6 +1,7 @@
 package network
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/Dimix-international/in_memory_db-GO/db"
 	"github.com/Dimix-international/in_memory_db-GO/db/storage"
-	"github.com/Dimix-international/in_memory_db-GO/db/wal"
 	"github.com/Dimix-international/in_memory_db-GO/internal/config"
 	"github.com/Dimix-international/in_memory_db-GO/internal/handler"
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
@@ -25,6 +25,7 @@ type TCPServer struct {
 	semaphore      *tools.Semaphore
 	log            *slog.Logger
 	storage        *storage.Storage
+	idGenerator    *service.IDGenerator
 }
 
 func NewTCPServer(cfg *config.Config, log *slog.Logger) (*TCPServer, error) {
@@ -40,7 +41,7 @@ func NewTCPServer(cfg *config.Config, log *slog.Logger) (*TCPServer, error) {
 		return nil, err
 	}
 
-	maxSegmentize, err := tools.ParseSize(cfg.WAL.MaxSegmentSize)
+	wal, err := service.CreateWal(cfg.WAL, log)
 	if err != nil {
 		return nil, err
 	}
@@ -52,19 +53,14 @@ func NewTCPServer(cfg *config.Config, log *slog.Logger) (*TCPServer, error) {
 		log:            log,
 		storage: storage.NewStorage(
 			db.NewDBMap(),
-			wal.NewWAL(
-				wal.NewFSWriter(cfg.WAL.DataDirectory, maxSegmentize, log),
-				wal.NewFSReader(cfg.WAL.DataDirectory, log),
-				cfg.WAL.FlushingBatchTimeout,
-				cfg.WAL.FlushingBatchSize,
-				log,
-			),
+			wal,
 			log,
 		),
+		idGenerator: service.NewIDGenerator(),
 	}, nil
 }
 
-func (s *TCPServer) Run() error {
+func (s *TCPServer) Run(ctx context.Context) error {
 	s.storage.Start()
 	listener, err := net.Listen("tcp", s.cfg.Network.Address)
 	if err != nil {
@@ -74,7 +70,7 @@ func (s *TCPServer) Run() error {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	go func() {
+	go func(ctx context.Context) {
 		defer wg.Done()
 
 		for {
@@ -89,17 +85,17 @@ func (s *TCPServer) Run() error {
 			}
 
 			wg.Add(1)
-			go func(conn net.Conn) {
+			go func(ctx context.Context, conn net.Conn) {
 				defer func() {
 					s.semaphore.Release()
 					wg.Done()
 				}()
 				s.semaphore.Acquire()
 
-				s.handleConn(conn)
-			}(conn)
+				s.handleConn(ctx, conn)
+			}(ctx, conn)
 		}
-	}()
+	}(ctx)
 
 	wg.Wait()
 
@@ -110,7 +106,7 @@ func (s *TCPServer) Run() error {
 	return nil
 }
 
-func (s *TCPServer) handleConn(conn net.Conn) {
+func (s *TCPServer) handleConn(ctx context.Context, conn net.Conn) {
 	request := make([]byte, s.maxMessageSize)
 	handlerRequest := handler.NewHanlderMessages(service.NewParserService(), service.NewAnalyzerService(), s.storage)
 
@@ -129,7 +125,8 @@ func (s *TCPServer) handleConn(conn net.Conn) {
 			break
 		}
 
-		result := handlerRequest.ProcessMessage(request[:count])
+		ctxWithID := context.WithValue(ctx, models.KeyTxID, s.idGenerator.Generate())
+		result := handlerRequest.ProcessMessage(ctxWithID, request[:count])
 
 		if _, err := conn.Write([]byte(result)); err != nil {
 			if err != io.EOF {

@@ -1,9 +1,13 @@
 package wal
 
 import (
+	"context"
 	"log/slog"
 	"sync"
 	"time"
+
+	"github.com/Dimix-international/in_memory_db-GO/internal/models"
+	"github.com/Dimix-international/in_memory_db-GO/internal/tools"
 )
 
 type fsWriter interface {
@@ -37,7 +41,7 @@ func NewWAL(
 	maxBatchSize int,
 	log *slog.Logger,
 ) *WAL {
-	return &WAL{
+	wall := &WAL{
 		fsWriter:     fsWriter,
 		fsReader:     fsReader,
 		flushTimeout: flushTimeout,
@@ -47,6 +51,8 @@ func NewWAL(
 		closeDoneCh:  make(chan struct{}),
 		log:          log,
 	}
+
+	return wall
 }
 
 func (w *WAL) Start() {
@@ -75,9 +81,45 @@ func (w *WAL) Shutdown() {
 	<-w.closeDoneCh
 }
 
-func (w *WAL) flushBatch() {}
+func (w *WAL) flushBatch() {
+	var batch []Log
+	tools.WithLock(&w.mutex, func() {
+		if len(w.batch) != 0 {
+			batch = w.batch
+			w.batch = nil
+		}
+	})
 
-func (w *WAL) tryRecoverWALSegments(stream chan<- []LogData) {
+	if len(batch) != 0 {
+		w.fsWriter.WriteBatch(batch)
+	}
+}
+
+func (w *WAL) Set(ctx context.Context, key, value string) tools.Future {
+	return w.push(ctx, models.SetCommandID, []string{key, value})
+}
+
+func (w *WAL) Del(ctx context.Context, key string) tools.Future {
+	return w.push(ctx, models.DelCommandID, []string{key})
+}
+
+func (w *WAL) push(ctx context.Context, commandID int, args []string) tools.Future {
+	txID := ctx.Value(models.KeyTxID).(int64)
+	record := NewLog(txID, commandID, args)
+
+	tools.WithLock(&w.mutex, func() {
+		w.batch = append(w.batch, record)
+
+		if len(w.batch) >= w.maxBatchSize {
+			w.batches <- w.batch
+			w.batch = nil
+		}
+	})
+
+	return record.Result()
+}
+
+func (w *WAL) TryRecoverWALSegments(stream chan<- []LogData) {
 	logs, err := w.fsReader.ReadLogs()
 	if err != nil {
 		w.log.Error("failed to recover WAL segments", "err", err)
