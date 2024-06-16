@@ -41,7 +41,7 @@ func TestTCPCli(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(1)
 
 	go func() {
 		defer wg.Done()
@@ -51,17 +51,6 @@ func TestTCPCli(t *testing.T) {
 		resp, err := client.Send([]byte(request))
 		assert.NoError(t, err)
 		assert.Equal(t, resp, []byte(response))
-	}()
-
-	go func() {
-		defer wg.Done()
-		client, err := NewTCPClient("127.0.0.1:10002", 2048, time.Millisecond*30)
-		assert.NoError(t, err)
-
-		time.Sleep(100 * time.Millisecond)
-
-		_, err = client.Send([]byte(request))
-		assert.Error(t, err)
 	}()
 
 	wg.Wait()

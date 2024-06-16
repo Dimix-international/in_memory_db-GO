@@ -14,11 +14,14 @@ import (
 const testWALDirectory = "temp_test_data"
 
 func TestWriteBatch(t *testing.T) {
+	os.RemoveAll(testWALDirectory)
+
 	writer := NewFSWriter(testWALDirectory, 10, logger.SetupLogger(""))
 	batch := []Log{
 		NewLog(int64(1), models.SetCommandID, []string{"key_4", "value_4"}),
 		NewLog(int64(2), models.SetCommandID, []string{"key_2", "value_2"}),
 		NewLog(int64(3), models.SetCommandID, []string{"key_3", "value_3"}),
+		NewLog(int64(4), models.SetCommandID, []string{"key_4", "value_4"}),
 	}
 
 	go func() {
