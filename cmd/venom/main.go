@@ -24,8 +24,16 @@ func main() {
 
 	log.Info("start VENOM")
 
-	if err := server.Run(ctx); err != nil {
-		log.Error("finish VENOM", "error", err)
+	go func() {
+		if err := server.Run(ctx); err != nil {
+			log.Error("finish VENOM", "error", err)
+		}
+	}()
+
+	<-ctx.Done()
+
+	if err := server.Shutdown(); err != nil {
+		log.Error("failed server shutdown", "error", err)
 	}
 
 	log.Info("finish VENOM")

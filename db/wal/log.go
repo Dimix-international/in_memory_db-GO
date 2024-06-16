@@ -10,12 +10,12 @@ type Log struct {
 	writePromise tools.Promise
 }
 
-func NewLog(lsn int64, commandName string, arguments []string) Log {
+func NewLog(lsn int64, commandID int, arguments []string) Log {
 	return Log{
 		data: models.LogData{
-			LSN:         lsn,
-			CommandName: commandName,
-			Arguments:   arguments,
+			LSN:       lsn,
+			CommandID: commandID,
+			Arguments: arguments,
 		},
 		writePromise: *tools.NewPromise(),
 	}
@@ -25,8 +25,8 @@ func (l *Log) Data() models.LogData {
 	return l.data
 }
 
-func (l *Log) CommandName() string {
-	return l.data.CommandName
+func (l *Log) CommandID() int {
+	return l.data.CommandID
 }
 
 func (l *Log) LSN() int64 {

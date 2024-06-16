@@ -19,6 +19,7 @@ type wal interface {
 	Set(ctx context.Context, key, value string) tools.Future
 	Del(ctx context.Context, key string) tools.Future
 	TryRecoverWALSegments(stream chan<- []models.LogData)
+	Shutdown()
 }
 
 type idGenerator interface {
@@ -92,14 +93,18 @@ func (s *Storage) recoverDB() {
 		maxID = logs[len(logs)-1].LSN
 
 		for i := 0; i < len(logs); i++ {
-			switch logs[i].CommandName {
-			case models.SetCommand:
+			switch logs[i].CommandID {
+			case models.SetCommandID:
 				s.db.Set(logs[i].Arguments[0], logs[i].Arguments[1])
-			case models.DeleteCommand:
+			case models.DeleteCommandID:
 				s.db.Delete(logs[i].Arguments[0])
 			}
 		}
 	}
 
 	s.idGenerator.SetInitValue(maxID)
+}
+
+func (s *Storage) Shutdown() {
+	s.wal.Shutdown()
 }

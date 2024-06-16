@@ -26,6 +26,7 @@ type TCPServer struct {
 	log            *slog.Logger
 	storage        *storage.Storage
 	idGenerator    *service.IDGenerator
+	listener       net.Listener
 }
 
 func NewTCPServer(cfg *config.Config, log *slog.Logger) (*TCPServer, error) {
@@ -71,6 +72,8 @@ func (s *TCPServer) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to listen: %w", err)
 	}
 
+	s.listener = listener
+
 	var wg sync.WaitGroup
 	wg.Add(1)
 
@@ -103,8 +106,13 @@ func (s *TCPServer) Run(ctx context.Context) error {
 
 	wg.Wait()
 
-	if err := listener.Close(); err != nil {
-		s.log.Error("failed to close listener", "error", err)
+	return nil
+}
+
+func (s *TCPServer) Shutdown() error {
+	s.storage.Shutdown()
+	if err := s.listener.Close(); err != nil {
+		return err
 	}
 
 	return nil
