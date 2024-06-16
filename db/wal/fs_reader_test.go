@@ -7,6 +7,7 @@ import (
 
 	"github.com/Dimix-international/in_memory_db-GO/internal/logger"
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
+
 	"github.com/stretchr/testify/assert"
 )
 
