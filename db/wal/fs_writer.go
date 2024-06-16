@@ -91,8 +91,7 @@ func (w *FSWriter) acknowledgeWrite(batch []Log, err error) {
 func (w *FSWriter) rotateSegment() error {
 	segmentName := fmt.Sprintf("%s/wal_%d.log", w.directory, now().UnixMilli())
 
-	err := os.MkdirAll(w.directory, 0755)
-	if err != nil {
+	if err := os.MkdirAll(w.directory, 0755); err != nil {
 		w.log.Error("failed to create directory for wal segment", "err", err)
 		return err
 	}

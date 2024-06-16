@@ -15,7 +15,7 @@ func TestTCPCli(t *testing.T) {
 	request := "SET weather_2_pm cold_moscow_weather"
 	response := "command SET is execute: weather_2_pm"
 
-	listener, err := net.Listen("tcp", ":10001")
+	listener, err := net.Listen("tcp", ":10002")
 	assert.NoError(t, err)
 
 	go func() {
@@ -44,22 +44,24 @@ func TestTCPCli(t *testing.T) {
 	wg.Add(2)
 
 	go func() {
-		client, err := NewTCPClient("127.0.0.1:10001", 2048, time.Minute)
+		defer wg.Done()
+		client, err := NewTCPClient("127.0.0.1:10002", 2048, time.Minute)
 		assert.NoError(t, err)
 
 		resp, err := client.Send([]byte(request))
 		assert.NoError(t, err)
 		assert.Equal(t, resp, []byte(response))
-		wg.Done()
 	}()
 
 	go func() {
-		client, err := NewTCPClient("127.0.0.1:10001", 2048, time.Millisecond*50)
+		defer wg.Done()
+		client, err := NewTCPClient("127.0.0.1:10002", 2048, time.Millisecond*30)
 		assert.NoError(t, err)
+
+		time.Sleep(100 * time.Millisecond)
 
 		_, err = client.Send([]byte(request))
 		assert.Error(t, err)
-		wg.Done()
 	}()
 
 	wg.Wait()
