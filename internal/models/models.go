@@ -49,8 +49,8 @@ type Query struct {
 
 // LogData - structure of logs for WAL
 type LogData struct {
-	LSN         int64  //id transaction
-	CommandName string //DEL = 1, SET = 2
+	LSN         int64 //id transaction
+	CommandName string
 	Arguments   []string
 }
 

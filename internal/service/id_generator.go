@@ -1,6 +1,11 @@
 package service
 
-import "sync/atomic"
+import (
+	"sync"
+	"sync/atomic"
+)
+
+var once sync.Once
 
 type IDGenerator struct {
 	counter atomic.Int64
@@ -8,6 +13,12 @@ type IDGenerator struct {
 
 func NewIDGenerator() *IDGenerator {
 	return &IDGenerator{}
+}
+
+func (g *IDGenerator) SetInitValue(inintValue int64) {
+	once.Do(func() {
+		g.counter.Store(inintValue)
+	})
 }
 
 func (g *IDGenerator) Generate() int64 {

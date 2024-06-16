@@ -46,6 +46,8 @@ func NewTCPServer(cfg *config.Config, log *slog.Logger) (*TCPServer, error) {
 		return nil, err
 	}
 
+	idGenerator := service.NewIDGenerator()
+
 	return &TCPServer{
 		maxMessageSize: maxMessageSize,
 		cfg:            cfg,
@@ -54,14 +56,16 @@ func NewTCPServer(cfg *config.Config, log *slog.Logger) (*TCPServer, error) {
 		storage: storage.NewStorage(
 			db.NewDBMap(),
 			wal,
+			idGenerator,
 			log,
 		),
-		idGenerator: service.NewIDGenerator(),
+		idGenerator: idGenerator,
 	}, nil
 }
 
 func (s *TCPServer) Run(ctx context.Context) error {
 	s.storage.Start()
+
 	listener, err := net.Listen("tcp", s.cfg.Network.Address)
 	if err != nil {
 		return fmt.Errorf("failed to listen: %w", err)

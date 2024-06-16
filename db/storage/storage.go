@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
@@ -22,17 +21,23 @@ type wal interface {
 	TryRecoverWALSegments(stream chan<- []models.LogData)
 }
 
-type Storage struct {
-	db  db
-	wal wal
-	log *slog.Logger
+type idGenerator interface {
+	SetInitValue(inintValue int64)
 }
 
-func NewStorage(db db, wal wal, log *slog.Logger) *Storage {
+type Storage struct {
+	db          db
+	wal         wal
+	idGenerator idGenerator
+	log         *slog.Logger
+}
+
+func NewStorage(db db, wal wal, idGenerator idGenerator, log *slog.Logger) *Storage {
 	return &Storage{
-		db:  db,
-		wal: wal,
-		log: log,
+		db:          db,
+		wal:         wal,
+		idGenerator: idGenerator,
+		log:         log,
 	}
 }
 
@@ -73,7 +78,10 @@ func (s *Storage) Del(ctx context.Context, key string) error {
 }
 
 func (s *Storage) recoverDB() {
-	logsChan := make(chan []models.LogData)
+	var (
+		maxID    int64 = 0
+		logsChan       = make(chan []models.LogData)
+	)
 
 	go func() {
 		defer close(logsChan)
@@ -81,6 +89,17 @@ func (s *Storage) recoverDB() {
 	}()
 
 	for logs := range logsChan {
-		fmt.Println("logs", logs)
+		maxID = logs[len(logs)-1].LSN
+
+		for i := 0; i < len(logs); i++ {
+			switch logs[i].CommandName {
+			case models.SetCommand:
+				s.db.Set(logs[i].Arguments[0], logs[i].Arguments[1])
+			case models.DeleteCommand:
+				s.db.Delete(logs[i].Arguments[0])
+			}
+		}
 	}
+
+	s.idGenerator.SetInitValue(maxID)
 }

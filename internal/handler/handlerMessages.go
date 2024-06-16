@@ -53,7 +53,7 @@ func (s *HandlerMessages) ProcessMessage(ctx context.Context, command []byte) st
 	case models.GetCommand:
 		value, _ := s.store.Get(query.Arguments[0])
 		if len(value) == 0 {
-			return fmt.Sprintf("key in db is not exist: %v", query.Arguments[0])
+			return fmt.Sprintf("key %v in db is not exist", query.Arguments[0])
 		}
 		return fmt.Sprintf("got value from db: %v", value)
 	case models.SetCommand:
