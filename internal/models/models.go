@@ -43,6 +43,8 @@ var (
 	ErrInvalidLogger = errors.New("logger is invalid")
 	// ErrInvalidLogger invalid logger
 	ErrNetClosed = errors.New("net closed")
+	// ErrIncorrectParseSize invalid size for parsing
+	ErrIncorrectParseSize = errors.New("incorrect size")
 )
 
 // Query - the structure that stores the command and its arguments for writing to the database
