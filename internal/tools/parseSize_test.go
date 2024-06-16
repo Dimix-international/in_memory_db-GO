@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
+
 	"github.com/stretchr/testify/assert"
 )
 
