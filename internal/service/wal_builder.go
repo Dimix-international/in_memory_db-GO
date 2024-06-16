@@ -23,36 +23,36 @@ func CreateWal(cfg *config.WALConfig, log *slog.Logger) (*wal.WAL, error) {
 	maxSegmentSize := defaultMaxSegmentSize
 	dataDirectory := defaultWALDataDirectory
 
-	if cfg != nil {
-		if cfg.FlushingBatchSize != 0 {
-			flushingBatchSize = cfg.FlushingBatchSize
-		}
-
-		if cfg.FlushingBatchTimeout != 0 {
-			flushingBatchTimeout = cfg.FlushingBatchTimeout
-		}
-
-		if cfg.MaxSegmentSize != "" {
-			size, err := tools.ParseSize(cfg.MaxSegmentSize)
-			if err != nil {
-				return nil, errors.New("max segment size is incorrect")
-			}
-
-			maxSegmentSize = size
-		}
-
-		if cfg.DataDirectory != "" {
-			dataDirectory = cfg.DataDirectory
-		}
-
-		return wal.NewWAL(
-			wal.NewFSWriter(dataDirectory, maxSegmentSize, log),
-			wal.NewFSReader(dataDirectory, log),
-			flushingBatchTimeout,
-			flushingBatchSize,
-			log,
-		), nil
+	if cfg == nil {
+		return nil, nil
 	}
 
-	return nil, nil
+	if cfg.FlushingBatchSize != 0 {
+		flushingBatchSize = cfg.FlushingBatchSize
+	}
+
+	if cfg.FlushingBatchTimeout != 0 {
+		flushingBatchTimeout = cfg.FlushingBatchTimeout
+	}
+
+	if cfg.MaxSegmentSize != "" {
+		size, err := tools.ParseSize(cfg.MaxSegmentSize)
+		if err != nil {
+			return nil, errors.New("max segment size is incorrect")
+		}
+
+		maxSegmentSize = size
+	}
+
+	if cfg.DataDirectory != "" {
+		dataDirectory = cfg.DataDirectory
+	}
+
+	return wal.NewWAL(
+		wal.NewFSWriter(dataDirectory, maxSegmentSize, log),
+		wal.NewFSReader(dataDirectory, log),
+		flushingBatchTimeout,
+		flushingBatchSize,
+		log,
+	), nil
 }

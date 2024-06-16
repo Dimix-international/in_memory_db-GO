@@ -55,7 +55,7 @@ func (w *FSWriter) WriteBatch(batch []Log) {
 		return
 	}
 
-	err := w.segment.Sync() //системный вызов, который доноси данные на диск
+	err := w.segment.Sync() // системный вызов, который доноси данные на диск
 	if err != nil {
 		w.log.Error("failed to sync segment file", "err", err)
 	}
@@ -82,7 +82,7 @@ func (w *FSWriter) writeLogs(logs []models.LogData) error {
 }
 
 func (w *FSWriter) acknowledgeWrite(batch []Log, err error) {
-	//как только подвердили запись - отпускаем клиентов
+	// как только подвердили запись - отпускаем клиентов
 	for _, log := range batch {
 		log.SetResult(err)
 	}

@@ -21,7 +21,7 @@ type fsReader interface {
 type WAL struct {
 	fsWriter     fsWriter
 	fsReader     fsReader
-	flushTimeout time.Duration //по истеканию записываем в log
+	flushTimeout time.Duration // по истеканию записываем в log
 	maxBatchSize int
 
 	mutex   sync.Mutex
