@@ -24,6 +24,7 @@ type wal interface {
 
 type idGenerator interface {
 	SetInitValue(inintValue int64)
+	Generate() int64
 }
 
 type Storage struct {
@@ -103,6 +104,10 @@ func (s *Storage) recoverDB() {
 	}
 
 	s.idGenerator.SetInitValue(maxID)
+}
+
+func (s *Storage) TransactionID() int64 {
+	return s.idGenerator.Generate()
 }
 
 func (s *Storage) Shutdown() {

@@ -19,6 +19,7 @@ type storage interface {
 	Get(key string) (string, error)
 	Set(ctx context.Context, key, value string) error
 	Del(ctx context.Context, key string) error
+	TransactionID() int64
 }
 
 // HandlerMessages - handler instance for handling messages
@@ -49,26 +50,33 @@ func (s *HandlerMessages) ProcessMessage(ctx context.Context, command []byte) st
 		return fmt.Sprintf("analyzing error: %v", err)
 	}
 
-	switch query.Command {
-	case models.GetCommand:
+	if query.Command != models.GetCommand &&
+		query.Command != models.SetCommand &&
+		query.Command != models.DeleteCommand {
+		return fmt.Sprintf("unknown command: %v", query.Arguments[0])
+	}
+
+	if query.Command == models.GetCommand {
 		value, _ := s.store.Get(query.Arguments[0])
 		if len(value) == 0 {
 			return fmt.Sprintf("key %v in db is not exist", query.Arguments[0])
 		}
 		return fmt.Sprintf("got value from db: %v", value)
-	case models.SetCommand:
-		err := s.store.Set(ctx, query.Arguments[0], query.Arguments[1])
+	}
+
+	ctxWithTxID := context.WithValue(ctx, models.KeyTxID, s.store.TransactionID())
+
+	if query.Command == models.SetCommand {
+		err := s.store.Set(ctxWithTxID, query.Arguments[0], query.Arguments[1])
 		if err != nil {
 			return fmt.Sprintf("falied SET command: %v with error %v", query.Arguments[0], err)
 		}
 		return fmt.Sprintf("command SET is execute: %v", query.Arguments[0])
-	case models.DeleteCommand:
-		err := s.store.Del(ctx, query.Arguments[0])
-		if err != nil {
-			return fmt.Sprintf("falied DELETE command: %v with error %v", query.Arguments[0], err)
-		}
-		return fmt.Sprintf("command DELETE is execute: %v", query.Arguments[0])
 	}
 
-	return fmt.Sprintf("unknown command: %v", query.Arguments[0])
+	err = s.store.Del(ctxWithTxID, query.Arguments[0])
+	if err != nil {
+		return fmt.Sprintf("falied DELETE command: %v with error %v", query.Arguments[0], err)
+	}
+	return fmt.Sprintf("command DELETE is execute: %v", query.Arguments[0])
 }

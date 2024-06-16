@@ -25,7 +25,6 @@ type TCPServer struct {
 	semaphore      *tools.Semaphore
 	log            *slog.Logger
 	storage        *storage.Storage
-	idGenerator    *service.IDGenerator
 	listener       net.Listener
 }
 
@@ -47,8 +46,6 @@ func NewTCPServer(cfg *config.Config, log *slog.Logger) (*TCPServer, error) {
 		return nil, err
 	}
 
-	idGenerator := service.NewIDGenerator()
-
 	return &TCPServer{
 		maxMessageSize: maxMessageSize,
 		cfg:            cfg,
@@ -57,10 +54,9 @@ func NewTCPServer(cfg *config.Config, log *slog.Logger) (*TCPServer, error) {
 		storage: storage.NewStorage(
 			db.NewDBMap(),
 			wal,
-			idGenerator,
+			service.NewIDGenerator(),
 			log,
 		),
-		idGenerator: idGenerator,
 	}, nil
 }
 
@@ -120,7 +116,11 @@ func (s *TCPServer) Shutdown() error {
 
 func (s *TCPServer) handleConn(ctx context.Context, conn net.Conn) {
 	request := make([]byte, s.maxMessageSize)
-	handlerRequest := handler.NewHanlderMessages(service.NewParserService(), service.NewAnalyzerService(), s.storage)
+	handlerRequest := handler.NewHanlderMessages(
+		service.NewParserService(),
+		service.NewAnalyzerService(),
+		s.storage,
+	)
 
 	for {
 		if err := conn.SetDeadline(time.Now().Add(s.cfg.Network.IdleTimeout)); err != nil {
@@ -137,8 +137,7 @@ func (s *TCPServer) handleConn(ctx context.Context, conn net.Conn) {
 			break
 		}
 
-		ctxWithID := context.WithValue(ctx, models.KeyTxID, s.idGenerator.Generate())
-		result := handlerRequest.ProcessMessage(ctxWithID, request[:count])
+		result := handlerRequest.ProcessMessage(ctx, request[:count])
 
 		if _, err := conn.Write([]byte(result)); err != nil {
 			if err != io.EOF {
