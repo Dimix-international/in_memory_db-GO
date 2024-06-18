@@ -7,4 +7,9 @@ network:
   max_message_size: "4KB"
 logging:  
   level: "local"  
-  output: "/log/output.log"
+  output: "./log/output.log"
+wal:  
+  flushing_batch_size: 100
+  flushing_batch_timeout: "10ms"
+  max_segment_size: "10MB"
+  data_directory: "./data/venom/wal"

@@ -19,7 +19,7 @@ func TestMustLoadPath(t *testing.T) {
 	assert.Equal(t, "in_memory", cfg.Engine.Type)
 
 	assert.Equal(t, "local", cfg.Logging.Level)
-	assert.Equal(t, "/log/output.log", cfg.Logging.Output)
+	assert.Equal(t, "./log/output.log", cfg.Logging.Output)
 }
 
 func TestConfigPathEmptyPanic(t *testing.T) {

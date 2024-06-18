@@ -1,6 +1,7 @@
 package network
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Dimix-international/in_memory_db-GO/db"
+	"github.com/Dimix-international/in_memory_db-GO/db/storage"
 	"github.com/Dimix-international/in_memory_db-GO/internal/config"
 	"github.com/Dimix-international/in_memory_db-GO/internal/handler"
 	"github.com/Dimix-international/in_memory_db-GO/internal/models"
@@ -19,43 +21,59 @@ import (
 
 type TCPServer struct {
 	maxMessageSize int
-	cfg            *config.NetworkConfig
+	cfg            *config.Config
 	semaphore      *tools.Semaphore
 	log            *slog.Logger
-	db             *db.DB
+	storage        *storage.Storage
+	listener       net.Listener
 }
 
-func NewTCPServer(cfg *config.NetworkConfig, log *slog.Logger) (*TCPServer, error) {
+func NewTCPServer(cfg *config.Config, log *slog.Logger) (*TCPServer, error) {
 	if log == nil {
 		return nil, models.ErrInvalidLogger
 	}
-	if cfg.MaxConnections <= 0 {
+	if cfg.Network.MaxConnections <= 0 {
 		return nil, models.ErrInvalidMaxConnections
 	}
 
-	maxMessageSize, err := tools.ParseSize(cfg.MaxMessageSize)
+	maxMessageSize, err := tools.ParseSize(cfg.Network.MaxMessageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	wal, err := service.CreateWal(cfg.WAL, log)
 	if err != nil {
 		return nil, err
 	}
 
 	return &TCPServer{
 		maxMessageSize: maxMessageSize,
-		cfg:            cfg, semaphore: tools.NewSemaphore(cfg.MaxConnections),
-		log: log,
-		db:  db.NewDBMap(),
+		cfg:            cfg,
+		semaphore:      tools.NewSemaphore(cfg.Network.MaxConnections),
+		log:            log,
+		storage: storage.NewStorage(
+			db.NewDBMap(),
+			wal,
+			service.NewIDGenerator(),
+			log,
+		),
 	}, nil
 }
 
-func (s *TCPServer) Run() error {
-	listener, err := net.Listen("tcp", s.cfg.Address)
+func (s *TCPServer) Run(ctx context.Context) error {
+	s.storage.Start()
+
+	listener, err := net.Listen("tcp", s.cfg.Network.Address)
 	if err != nil {
 		return fmt.Errorf("failed to listen: %w", err)
 	}
 
+	s.listener = listener
+
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	go func() {
+	go func(ctx context.Context) {
 		defer wg.Done()
 
 		for {
@@ -70,33 +88,42 @@ func (s *TCPServer) Run() error {
 			}
 
 			wg.Add(1)
-			go func(conn net.Conn) {
+			go func(ctx context.Context, conn net.Conn) {
 				defer func() {
 					s.semaphore.Release()
 					wg.Done()
 				}()
 				s.semaphore.Acquire()
 
-				s.handleConn(conn)
-			}(conn)
+				s.handleConn(ctx, conn)
+			}(ctx, conn)
 		}
-	}()
+	}(ctx)
 
 	wg.Wait()
 
-	if err := listener.Close(); err != nil {
-		s.log.Error("failed to close listener", "error", err)
+	return nil
+}
+
+func (s *TCPServer) Shutdown() error {
+	s.storage.Shutdown()
+	if err := s.listener.Close(); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (s *TCPServer) handleConn(conn net.Conn) {
+func (s *TCPServer) handleConn(ctx context.Context, conn net.Conn) {
 	request := make([]byte, s.maxMessageSize)
-	handlerRequest := handler.NewHanlderMessages(service.NewParserService(), service.NewAnalyzerService(), s.db)
+	handlerRequest := handler.NewHanlderMessages(
+		service.NewParserService(),
+		service.NewAnalyzerService(),
+		s.storage,
+	)
 
 	for {
-		if err := conn.SetDeadline(time.Now().Add(s.cfg.IdleTimeout)); err != nil {
+		if err := conn.SetDeadline(time.Now().Add(s.cfg.Network.IdleTimeout)); err != nil {
 			s.log.Error("failed to set read deadline", "error", err)
 			break
 		}
@@ -110,7 +137,7 @@ func (s *TCPServer) handleConn(conn net.Conn) {
 			break
 		}
 
-		result := handlerRequest.ProcessMessage(request[:count])
+		result := handlerRequest.ProcessMessage(ctx, request[:count])
 
 		if _, err := conn.Write([]byte(result)); err != nil {
 			if err != io.EOF {
