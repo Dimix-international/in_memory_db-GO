@@ -20,6 +20,7 @@ type Config struct {
 	Engine  *EngineConfig  `yaml:"engine"`
 	Network *NetworkConfig `yaml:"network"`
 	Logging *LoggingConfig `yaml:"logging"`
+	WAL     *WALConfig     `yaml:"wal"`
 }
 
 type EngineConfig struct {
@@ -36,6 +37,13 @@ type NetworkConfig struct {
 type LoggingConfig struct {
 	Level  string `yaml:"level" env-default:"local"`
 	Output string `yaml:"output" env-default:"/log/output.log"`
+}
+
+type WALConfig struct {
+	FlushingBatchSize    int           `yaml:"flushing_batch_size" env-default:"100"`
+	FlushingBatchTimeout time.Duration `yaml:"flushing_batch_timeout" env-default:"10ms"`
+	MaxSegmentSize       string        `yaml:"max_segment_size" env-default:"10MB"`
+	DataDirectory        string        `yaml:"data_directory" env-default:"/data/venom/wal"`
 }
 
 // MustLoadConfig starts reading from the .env file and writing to the configuration structure

@@ -1,6 +1,7 @@
 package network
 
 import (
+	"context"
 	"log"
 	"net"
 	"testing"
@@ -15,19 +16,29 @@ import (
 func TestServer(t *testing.T) {
 	t.Parallel()
 
-	server, err := NewTCPServer(
-		&config.NetworkConfig{
+	cfg := &config.Config{
+		WAL: &config.WALConfig{
+			FlushingBatchSize:    100,
+			FlushingBatchTimeout: time.Millisecond * 10,
+			MaxSegmentSize:       "10MB",
+			DataDirectory:        "/data/venom/wal",
+		},
+		Network: &config.NetworkConfig{
 			Address:        ":20001",
 			MaxConnections: 1,
 			IdleTimeout:    time.Second * 5,
 			MaxMessageSize: "2KB",
 		},
+	}
+
+	server, err := NewTCPServer(
+		cfg,
 		logger.SetupLogger(""),
 	)
 	assert.NoError(t, err)
 
 	go func() {
-		err = server.Run()
+		err = server.Run(context.TODO())
 		assert.NoError(t, err)
 	}()
 

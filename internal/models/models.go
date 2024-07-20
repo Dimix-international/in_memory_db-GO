@@ -18,6 +18,10 @@ const (
 	DeleteCommandArgumentsNumber = 1
 	// SetCommandArgumentsNumber the number of arguments for the SET command
 	SetCommandArgumentsNumber = 2
+	// SetCommandID the id of command set for log
+	SetCommandID = 1
+	// DeleteCommandID the id of command delete for log
+	DeleteCommandID = 2
 )
 
 var (
@@ -39,6 +43,8 @@ var (
 	ErrInvalidLogger = errors.New("logger is invalid")
 	// ErrInvalidLogger invalid logger
 	ErrNetClosed = errors.New("net closed")
+	// ErrIncorrectParseSize invalid size for parsing
+	ErrIncorrectParseSize = errors.New("incorrect size")
 )
 
 // Query - the structure that stores the command and its arguments for writing to the database
@@ -46,6 +52,17 @@ type Query struct {
 	Command   string
 	Arguments []string
 }
+
+// LogData - structure of logs for WAL
+type LogData struct {
+	LSN       int64 // id transaction
+	CommandID int
+	Arguments []string
+}
+
+type txContextKey string
+
+var KeyTxID = txContextKey("tx")
 
 // CloseFunc - function for graceful shutdown
 type CloseFunc func(context.Context) error

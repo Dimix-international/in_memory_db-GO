@@ -1,6 +1,10 @@
 package tools
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/Dimix-international/in_memory_db-GO/internal/models"
+)
 
 func ParseSize(text string) (int, error) {
 	if len(text) == 0 || text[0] < '0' || text[0] > '9' {
@@ -26,6 +30,6 @@ func ParseSize(text string) (int, error) {
 	case "B", "b", "":
 		return size, nil
 	default:
-		return 0, errors.New("incorrect size")
+		return 0, models.ErrIncorrectParseSize
 	}
 }
